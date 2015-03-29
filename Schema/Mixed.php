@@ -8,7 +8,7 @@ use JMS\Serializer\JsonSerializationVisitor;
 
 class Mixed
 {
-    private $data;
+    public $data;
 
     /**
      * @JMS\HandlerCallback("json", direction="serialization")

@@ -11,7 +11,7 @@ use JMS\Serializer\Annotation as JMS;
  *
  * @Annotation
  */
-class Swagger
+class Swagger implements VendorExtensionSupportInterface
 {
     /**
      * Specifies the Swagger Specification version being used.
@@ -173,6 +173,27 @@ class Swagger
      * @JMS\SerializedName("externalDocs")
      */
     public $externalDocs;
+
+    /**
+     * @var Mixed[]
+     * @JMS\Type("array<string,Draw\Swagger\Schema\Mixed>")
+     * @JMS\Accessor(getter="getFakeVendor")
+     */
+    public $vendor;
+
+    public function getFakeVendor()
+    {
+        return null;
+    }
+
+    public function getVendorData()
+    {
+        if(!$this->vendor) {
+            return array();
+        }
+
+        return $this->vendor;
+    }
 
     /**
      * @return Operation[]

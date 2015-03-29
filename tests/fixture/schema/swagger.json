@@ -15,5 +15,6 @@
       "url": "http://opensource.org/licenses/MIT"
     },
     "version": "1.0"
-  }
+  },
+  "x-test": "test"
 }
