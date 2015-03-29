@@ -2,10 +2,13 @@
 
 namespace Draw\Swagger;
 
+use Draw\Swagger\Extraction\ExtractionContext;
+use Draw\Swagger\Extraction\ExtractionContextInterface;
+use Draw\Swagger\Extraction\ExtractorInterface;
+use Draw\Swagger\Extraction\Extractor\SwaggerSchemaExtractor;
 use JMS\Serializer\EventDispatcher\EventDispatcher;
 use JMS\Serializer\SerializerBuilder;
 use JMS\Serializer\SerializerInterface;
-use Symfony\Component\EventDispatcher\EventDispatcherInterface;
 use Draw\Swagger\Schema\Swagger as Schema;
 
 /**
@@ -16,49 +19,38 @@ use Draw\Swagger\Schema\Swagger as Schema;
 class Swagger
 {
     /**
-     * @var EventDispatcherInterface
-     */
-    private $eventDispatcher;
-
-    /**
      * @var SerializerInterface
      */
     private $serializer;
 
-    public function __construct(EventDispatcherInterface $eventDispatcher = null, SerializerInterface $serializer = null)
-    {
-        if(is_null($eventDispatcher)) {
-            $eventDispatcher = new \Symfony\Component\EventDispatcher\EventDispatcher();
-        }
-        $this->eventDispatcher = $eventDispatcher;
+    /**
+     * @var array
+     */
+    private $extractors = array();
 
-        if(is_null($serializer)) {
+    /**
+     * @var ExtractorInterface[]
+     */
+    private $sortedExtractors;
+
+    public function __construct(SerializerInterface $serializer = null)
+    {
+        if (is_null($serializer)) {
             $serializer = SerializerBuilder::create()->configureListeners(
-                function(EventDispatcher $dispatcher) {
+                function (EventDispatcher $dispatcher) {
                     $dispatcher->addSubscriber(new JMSSerializerListener());
                 }
             )->build();
 
         }
         $this->serializer = $serializer;
+
+        $this->registerExtractor(new SwaggerSchemaExtractor($this->serializer), -1, 'swagger');
     }
 
-    /**
-     * @param Schema|null $schema The base swagger schema to start from
-     * @return \Draw\Swagger\Schema\Swagger
-     */
-    public function build(Schema $schema = null)
+    public function registerExtractor(ExtractorInterface $extractorInterface, $position = 0, $section = 'default')
     {
-        if (is_null($schema)) {
-            $schema = new Schema();
-        }
-
-        $this->eventDispatcher->dispatch(
-            GenerateEvent::NAME,
-            new GenerateEvent($this, array('swagger' => $schema))
-        );
-
-        return $schema;
+        $this->extractors[$section][$position][] = $extractorInterface;
     }
 
     /**
@@ -67,16 +59,46 @@ class Swagger
      */
     public function dump(Schema $schema)
     {
-        return $this->serializer->serialize($schema,'json');
+        return $this->serializer->serialize($schema, 'json');
     }
 
     /**
      * @api
      * @param string $jsonSchema
-     * @return Schema
+     * @return mixed
      */
-    public function extract($jsonSchema)
+    public function extract($source, $type = null, ExtractionContextInterface $extractionContext = null)
     {
-        return $this->serializer->deserialize($jsonSchema, 'Draw\Swagger\Schema\Swagger','json');
+        if (is_null($type)) {
+            $type = new Schema();
+        }
+
+        if(is_null($extractionContext)) {
+            $extractionContext = new ExtractionContext($this, $type);
+        }
+
+        foreach($this->getSortedExtractors() as $extractor) {
+            if($extractor->canExtract($source, $type, $extractionContext)) {
+                $extractor->extract($source, $type, $extractionContext);
+            }
+        }
+
+        return $type;
+    }
+
+    /**
+     * @return ExtractorInterface[]
+     */
+    private function getSortedExtractors()
+    {
+        if(is_null($this->sortedExtractors)) {
+            $this->sortedExtractors = array();
+            foreach($this->extractors as $section => $extractors) {
+                ksort($extractors);
+                $this->sortedExtractors = call_user_func_array('array_merge', $extractors);
+            }
+        }
+
+        return $this->sortedExtractors;
     }
 } 

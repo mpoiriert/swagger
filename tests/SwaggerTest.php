@@ -7,7 +7,7 @@ use Symfony\Component\EventDispatcher\EventDispatcher;
 
 class SwaggerTest extends \PHPUnit_Framework_TestCase
 {
-    public function provideTestExtract()
+    public function provideTestExtractSwaggerSchema()
     {
         $result = array();
         foreach(glob(__DIR__ . '/fixture/schema/*.json') as $file) {
@@ -18,10 +18,10 @@ class SwaggerTest extends \PHPUnit_Framework_TestCase
     }
 
     /**
-     * @dataProvider provideTestExtract
+     * @dataProvider provideTestExtractSwaggerSchema
      * @param $file
      */
-    public function testExtract($file)
+    public function testExtractSwaggerSchema($file)
     {
         $swagger = new Swagger();
 

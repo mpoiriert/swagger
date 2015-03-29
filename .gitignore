@@ -38,3 +38,9 @@
 
 # Ide
 .idea
+
+# Test
+/tests/report
+
+# Composer
+/composer.lock

@@ -1,0 +1,22 @@
+{
+  "swagger": "2.0",
+  "host": "localhost",
+  "info": {
+    "title": "Swagger Documentation Test",
+    "description": "Schema sample for swagger test",
+    "termsOfService": "This is the terms of service",
+    "contact": {
+      "name": "Martin Poirier Théorêt",
+      "url": "https://github.com/mpoiriert",
+      "email": "mpoiriert@gmail.com"
+    },
+    "license": {
+      "name": "MIT",
+      "url": "http://opensource.org/licenses/MIT"
+    },
+    "version": "1.0"
+  },
+  "paths": {
+    "/service": {}
+  }
+}

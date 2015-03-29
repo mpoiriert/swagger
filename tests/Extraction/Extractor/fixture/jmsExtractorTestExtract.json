@@ -1,0 +1,26 @@
+{
+  "swagger": "2.0",
+  "definitions": {
+    "Draw\/Swagger\/Extraction\/Extractor\/JmsExtractorStubModel": {
+      "properties": {
+        "virtual": {
+          "description": "The virtual property.",
+          "$ref": "#\/definitions\/Draw\/Swagger\/Extraction\/Extractor\/JmsExtractorStubModel"
+        },
+        "name": {
+          "description": "The name",
+          "type": "string"
+        },
+        "serializeProperty": {
+          "description": "Serialized property",
+          "type": "string"
+        },
+        "array": {
+          "description": "The array",
+          "type": "array",
+          "items": {"$ref": "#\/definitions\/Draw\/Swagger\/Extraction\/Extractor\/JmsExtractorStubModel"}
+        }
+      }
+    }
+  }
+}

@@ -7,8 +7,6 @@ use JMS\Serializer\Annotation as JMS;
 /**
  * @author Martin Poirier Theoret <mpoiriert@gmail.com>
  *
- * @property string $$ref
- *
  */
 class Schema
 {

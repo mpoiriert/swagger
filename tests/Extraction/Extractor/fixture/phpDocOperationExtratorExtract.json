@@ -1,0 +1,16 @@
+{
+  "swagger": "2.0",
+  "paths": {
+    "\/service": {
+      "get": {
+        "responses": {
+          "200": {"schema": {"$ref": "#\/definitions\/Draw\/Swagger\/Extraction\/Extractor\/StubService"}},
+          "500": {"description": "When problem occur"},
+          "408": {"description": "Define message"},
+          "400": {"description": "The extraction is impossible"}
+        }
+      }
+    }
+  },
+  "definitions": {"Draw\/Swagger\/Extraction\/Extractor\/StubService": {}}
+}

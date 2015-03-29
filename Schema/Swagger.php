@@ -3,7 +3,6 @@
 namespace Draw\Swagger\Schema;
 
 use Symfony\Component\Validator\Constraints as Assert;
-use Draw\Swagger\Computed\Operation;
 use JMS\Serializer\Annotation as JMS;
 
 /**
@@ -195,19 +194,31 @@ class Swagger implements VendorExtensionSupportInterface
         return $this->vendor;
     }
 
-    /**
-     * @return Operation[]
-     */
-    public function getComputedOperations()
+    public function hasDefinition($name)
     {
-        $result = array();
-
-        foreach($this->paths as $path => $pathItem){
-            foreach($pathItem as $method => $operation) {
-                $result[$operation->operationId] = new Operation($path,$pathItem, $method, $operation);
-            }
+        if(is_null($this->definitions)) {
+            return false;
         }
 
-        return $result;
+        $name = $this->sanitizeReferenceName($name);
+
+        return array_key_exists($name, $this->definitions);
+    }
+
+    public function addDefinition($name, Schema $schema)
+    {
+        $name = $this->sanitizeReferenceName($name);
+        $this->definitions[$name] = $schema;
+        return $this->getDefinitionReference($name);
+    }
+
+    public function getDefinitionReference($name)
+    {
+        return '#/definitions/' . $this->sanitizeReferenceName($name);
+    }
+
+    public function sanitizeReferenceName($name)
+    {
+        return trim(str_replace('\\', '/', $name), '/');
     }
 }
