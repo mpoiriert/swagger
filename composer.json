@@ -1,0 +1,21 @@
+{
+    "name": "draw/swagger",
+    "type": "project",
+    "description": "Swagger PHP manipulation library",
+    "minimum-stability": "dev",
+    "prefer-stable": true,
+    "autoload": {
+        "psr-4": {
+            "Draw\\Swagger\\": ""
+        }
+    },
+    "require": {
+        "php": ">=5.3.3",
+        "symfony/validator": "~2.3",
+        "symfony/event-dispatcher": "~2.3",
+        "jms/serializer": "@stable"
+    },
+    "require-dev": {
+        "phpunit/phpunit": "4.1.*"
+    }
+}
