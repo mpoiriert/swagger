@@ -174,6 +174,19 @@ class Schema
     public $additionalProperties;
 
     /**
+     * Relevant only for Schema "properties" definitions. Declares the property as "read only".
+     * This means that it MAY be sent as part of a response but MUST NOT be sent as part of the request.
+     * Properties marked as readOnly being true SHOULD NOT be in the required list of the defined schema.
+     * Default value is false.
+     *
+     * @var boolean
+     *
+     * @JMS\Type("boolean")
+     * @JMS\SerializedName("readOnly")
+     */
+    public $readOnly;
+
+    /**
      * This MAY be used only on properties schemas.
      * It has no effect on root schemas.
      * Adds Additional metadata to describe the XML representation format of this property.

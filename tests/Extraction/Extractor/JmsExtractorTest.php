@@ -95,6 +95,7 @@ class JmsExtractorStubModel
      * @var string
      * @JMS\Type("string")
      * @JMS\Groups("test")
+     * @JMS\ReadOnly()
      */
     public $name;
 

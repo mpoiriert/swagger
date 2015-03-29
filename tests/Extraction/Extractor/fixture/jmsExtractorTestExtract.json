@@ -5,11 +5,13 @@
       "properties": {
         "virtual": {
           "description": "The virtual property.",
-          "$ref": "#\/definitions\/Draw\/Swagger\/Extraction\/Extractor\/JmsExtractorStubModel"
+          "$ref": "#\/definitions\/Draw\/Swagger\/Extraction\/Extractor\/JmsExtractorStubModel",
+          "readOnly": true
         },
         "name": {
           "description": "The name",
-          "type": "string"
+          "type": "string",
+          "readOnly": true
         },
         "serializeProperty": {
           "description": "Serialized property",

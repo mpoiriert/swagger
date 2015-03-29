@@ -89,16 +89,16 @@ class JmsExtractor implements ExtractorInterface
                 continue;
             }
 
-            if (is_null($item->type)) {
-                continue;
-            }
-
             if ($type = $this->getNestedTypeInArray($item)) {
                 $propertySchema = new Schema();
                 $propertySchema->type = 'array';
                 $propertySchema->items = $this->extractTypeSchema($type, $extractionContext);
             } else {
                 $propertySchema = $this->extractTypeSchema($item->type['name'], $extractionContext);
+            }
+
+            if($item->readOnly) {
+                $propertySchema->readOnly = true;
             }
 
             $name = $this->namingStrategy->translateName($item);
