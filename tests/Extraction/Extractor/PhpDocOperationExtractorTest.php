@@ -62,7 +62,7 @@ class PhpDocOperationExtractorTest extends \PHPUnit_Framework_TestCase
         $extractor->extract($reflectionMethod, $operation, $context);
 
         $this->assertJsonStringEqualsJsonString(
-            file_get_contents(__DIR__ . '/fixture/phpDocOperationExtratorExtract.json'),
+            file_get_contents(__DIR__ . '/fixture/phpDocOperationExtractorExtract.json'),
             $context->getSwagger()->dump($context->getRootSchema())
         );
     }
@@ -83,7 +83,7 @@ class PhpDocOperationExtractorStubService
      * @param $string
      * @param array $array
      *
-     * @return \Draw\Swagger\Extraction\Extractor\StubService
+     * @return \Draw\Swagger\Extraction\Extractor\PhpDocOperationExtractorStubService
      *
      * @throws \Exception When problem occur
      * @throws \LengthException

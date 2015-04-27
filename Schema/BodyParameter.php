@@ -19,4 +19,9 @@ class BodyParameter extends BaseParameter
      * @JMS\Type("Draw\Swagger\Schema\Schema")
      */
     public $schema;
+
+    public function __construct()
+    {
+        $this->name = "body";
+    }
 } 

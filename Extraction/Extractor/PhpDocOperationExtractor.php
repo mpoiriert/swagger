@@ -5,9 +5,11 @@ namespace Draw\Swagger\Extraction\Extractor;
 use Draw\Swagger\Extraction\ExtractionContextInterface;
 use Draw\Swagger\Extraction\ExtractionImpossibleException;
 use Draw\Swagger\Extraction\ExtractorInterface;
+use Draw\Swagger\Schema\BodyParameter;
 use Draw\Swagger\Schema\Operation;
 use Draw\Swagger\Schema\Response;
 use Draw\Swagger\Schema\Schema;
+use Draw\Swagger\Schema\Swagger;
 use phpDocumentor\Reflection\DocBlock;
 use ReflectionMethod;
 
@@ -43,7 +45,7 @@ class PhpDocOperationExtractor implements ExtractorInterface
      * extraction.
      *
      * @param ReflectionMethod $method
-     * @param Operation $type
+     * @param Operation $operation
      * @param ExtractionContextInterface $extractionContext
      */
     public function extract($method, $operation, ExtractionContextInterface $extractionContext)
@@ -53,21 +55,15 @@ class PhpDocOperationExtractor implements ExtractorInterface
         }
 
         $docBlock = new DocBlock($method->getDocComment());
-        $swagger = $extractionContext->getRootSchema();
 
         foreach ($docBlock->getTagsByName('return') as $returnTag) {
             /* @var $returnTag \phpDocumentor\Reflection\DocBlock\Tag\ReturnTag */
             foreach ($returnTag->getTypes() as $type) {
-                if(!$swagger->hasDefinition($type)) {
-                    $modelSchema = new Schema();
-                    $extractionContext->getSwagger()->extract($type, $modelSchema, $extractionContext);
-                    $swagger->addDefinition($type, $modelSchema);
-                }
-
                 $response = new Response();
                 $response->schema = $responseSchema = new Schema();
                 $operation->responses[200] = $response;
-                $responseSchema->ref = $swagger->getDefinitionReference($type);
+
+                $this->setSchemaType($responseSchema, $type, $extractionContext);;
             }
         }
 
@@ -90,6 +86,76 @@ class PhpDocOperationExtractor implements ExtractorInterface
             }
 
             $exceptionResponse->description = $message;
+        }
+
+        $bodyParameter = null;
+
+        foreach ($operation->parameters as $parameter) {
+            if ($parameter instanceof BodyParameter) {
+                $bodyParameter = $parameter;
+                break;
+            }
+        }
+
+        foreach ($docBlock->getTagsByName('param') as $paramTag) {
+            /* @var $paramTag \phpDocumentor\Reflection\DocBlock\Tag\ParamTag */
+
+            $parameterName = trim($paramTag->getVariableName(), '$');
+
+            $parameter = null;
+            foreach ($operation->parameters as $existingParameter) {
+                if ($existingParameter->name == $parameterName) {
+                    $parameter = $existingParameter;
+                    break;
+                }
+            }
+
+            if (!is_null($parameter)) {
+                if (!$parameter->description) {
+                    $parameter->description = $paramTag->getDescription();
+                }
+
+                if (!$parameter->type) {
+                    $parameter->type = $paramTag->getType();
+                }
+                continue;
+            }
+
+            if (!is_null($bodyParameter)) {
+                /* @var BodyParameter $bodyParameter */
+                if (isset($bodyParameter->schema->properties[$parameterName])) {
+                    $parameter = $bodyParameter->schema->properties[$parameterName];
+
+                    if (!$parameter->description) {
+                        $parameter->description = $paramTag->getDescription();
+                    }
+
+                    if (!$parameter->type) {
+                        $this->setSchemaType($parameter, $paramTag->getType(), $extractionContext);
+                    }
+                    continue;
+                }
+            }
+        }
+    }
+
+    private function setSchemaType(Schema $schema, $type, ExtractionContextInterface $extractionContext)
+    {
+        $swagger = $extractionContext->getRootSchema();
+        if (class_exists($type)) {
+            if (!$swagger->hasDefinition($type)) {
+                $modelSchema = new Schema();
+                $extractionContext->getSwagger()->extract(
+                    new \ReflectionClass($type),
+                    $modelSchema,
+                    $extractionContext
+                );
+                $swagger->addDefinition($type, $modelSchema);
+            }
+
+            $schema->ref = $swagger->getDefinitionReference($type);
+        } else {
+            $schema->type = $type;
         }
     }
 

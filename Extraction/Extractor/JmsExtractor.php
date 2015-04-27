@@ -97,7 +97,7 @@ class JmsExtractor implements ExtractorInterface
                 $propertySchema = $this->extractTypeSchema($item->type['name'], $extractionContext);
             }
 
-            if($item->readOnly) {
+            if ($item->readOnly) {
                 $propertySchema->readOnly = true;
             }
 
@@ -132,7 +132,7 @@ class JmsExtractor implements ExtractorInterface
 
     private function isPrimitive($type)
     {
-        return in_array($type, array('boolean', 'integer', 'string', 'float', 'double', 'array', 'DateTime'));
+        return in_array($type, array('boolean', 'integer', 'string', 'float', 'double', 'array', 'DateTime', null));
     }
 
     /**

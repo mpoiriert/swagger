@@ -97,7 +97,7 @@ class Operation
      *
      * @JMS\Type("array<Draw\Swagger\Schema\BaseParameter>")
      */
-    public $parameters;
+    public $parameters = array();
 
     /**
      * The list of possible responses as they are returned from executing this operation.
@@ -107,7 +107,7 @@ class Operation
      * @Assert\NotBlank()
      * @JMS\Type("array<string,Draw\Swagger\Schema\Response>")
      */
-    public $responses;
+    public $responses = array();
 
     /**
      * The transfer protocol for the operation. Values MUST be from the list: "http", "https", "ws", "wss". The value overrides the Swagger Object schemes definition.
@@ -115,7 +115,7 @@ class Operation
      * @var string[]
      *
      * @Assert\Choice({"http","https","ws","wss"})
-     * @JMS\Type("string")
+     * @JMS\Type("array<string>")
      */
     public $schemes;
 
