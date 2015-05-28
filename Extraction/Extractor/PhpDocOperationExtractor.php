@@ -9,7 +9,6 @@ use Draw\Swagger\Schema\BodyParameter;
 use Draw\Swagger\Schema\Operation;
 use Draw\Swagger\Schema\Response;
 use Draw\Swagger\Schema\Schema;
-use Draw\Swagger\Schema\Swagger;
 use phpDocumentor\Reflection\DocBlock;
 use ReflectionMethod;
 
@@ -141,19 +140,12 @@ class PhpDocOperationExtractor implements ExtractorInterface
 
     private function setSchemaType(Schema $schema, $type, ExtractionContextInterface $extractionContext)
     {
-        $swagger = $extractionContext->getRootSchema();
         if (class_exists($type)) {
-            if (!$swagger->hasDefinition($type)) {
-                $modelSchema = new Schema();
-                $extractionContext->getSwagger()->extract(
-                    new \ReflectionClass($type),
-                    $modelSchema,
-                    $extractionContext
-                );
-                $swagger->addDefinition($type, $modelSchema);
-            }
-
-            $schema->ref = $swagger->getDefinitionReference($type);
+            $extractionContext->getSwagger()->extract(
+                new \ReflectionClass($type),
+                $schema,
+                $extractionContext
+            );
         } else {
             $schema->type = $type;
         }
