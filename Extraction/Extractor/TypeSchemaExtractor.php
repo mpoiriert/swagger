@@ -63,11 +63,19 @@ class TypeSchemaExtractor implements ExtractorInterface
 
         if($target->type == "object") {
             $reflectionClass = new \ReflectionClass($primitiveType['class']);
-            $extractionContext->getSwagger()->extract(
-                $reflectionClass,
-                $target,
-                $extractionContext
-            );
+            $name = $reflectionClass->getName();
+            $rootSchema = $extractionContext->getRootSchema();
+            if(!$rootSchema->hasDefinition($name)) {
+                $rootSchema->addDefinition($name, $refSchema = new Schema());
+                $refSchema->type = "object";
+                $extractionContext->getSwagger()->extract(
+                    $reflectionClass,
+                    $refSchema ,
+                    $extractionContext
+                );
+            }
+
+            $target->ref = $rootSchema->getDefinitionReference($name);
             return;
         }
 
