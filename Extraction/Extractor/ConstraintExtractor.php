@@ -23,9 +23,9 @@ abstract class ConstraintExtractor implements ConstraintExtractorInterface
         $this->metadataFactory = $metadataFactoryInterface;
     }
 
-    abstract function supportConstraint(Constraint $constraint);
+    abstract public function supportConstraint(Constraint $constraint);
 
-    abstract function extractConstraint(Constraint $constraint, ConstraintExtractionContext $context);
+    abstract public function extractConstraint(Constraint $constraint, ConstraintExtractionContext $context);
 
     protected function assertSupportConstraint(Constraint $constraint)
     {
