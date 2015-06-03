@@ -62,7 +62,7 @@ class PhpDocOperationExtractor implements ExtractorInterface
                 $response->schema = $responseSchema = new Schema();
                 $operation->responses[200] = $response;
 
-                $this->setSchemaType($responseSchema, $type, $extractionContext);;
+                $extractionContext->getSwagger()->extract($type, $responseSchema, $extractionContext);
             }
         }
 
@@ -116,7 +116,7 @@ class PhpDocOperationExtractor implements ExtractorInterface
 
                 if (!$parameter->type) {
                     $parameter->type = $paramTag->getType();
-                    if($parameter->type == "DateTime") {
+                    if ($parameter->type == "DateTime") {
 
                     }
                 }
@@ -133,25 +133,12 @@ class PhpDocOperationExtractor implements ExtractorInterface
                     }
 
                     if (!$parameter->type) {
-                        $this->setSchemaType($parameter, $paramTag->getType(), $extractionContext);
+                        $extractionContext->getSwagger()->extract($paramTag->getType(), $parameter, $extractionContext);
                     }
+
                     continue;
                 }
             }
-        }
-    }
-
-    private function setSchemaType(Schema $schema, $type, ExtractionContextInterface $extractionContext)
-    {
-        if (class_exists($type)) {
-            $extractionContext->getSwagger()->extract(
-                new \ReflectionClass($type),
-                $schema,
-                $extractionContext
-            );
-            $schema->type = "object";
-        } else {
-            $schema->type = $type;
         }
     }
 
