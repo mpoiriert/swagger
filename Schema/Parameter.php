@@ -18,7 +18,9 @@ class Parameter extends BaseParameter
      *
      * @var string
      *
+     * @Assert\NotNull()
      * @Assert\Choice({"string", "number", "integer", "boolean", "array", "file"})
+     *
      * @JMS\Type("string")
      */
     public $type;

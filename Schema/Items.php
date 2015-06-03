@@ -16,8 +16,9 @@ class Items
      *
      * @var string
      *
-     * @Assert\NotBlank()
-     * @Assert\Choice({"string", "number", "integer", "boolean", "array"})
+     * @Assert\NotNull()
+     * @Assert\Choice({"string", "number", "integer", "boolean", "array", "file"})
+     *
      * @JMS\Type("string")
      */
     public $type;

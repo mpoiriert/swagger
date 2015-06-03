@@ -111,28 +111,58 @@ class JmsExtractor implements ExtractorInterface
     {
         $schema = new Schema();
 
-        if ($this->isPrimitive($type)) {
-            $schema->type = $type;
-        } else {
-            $rootSchema = $extractionContext->getRootSchema();
-            if (!$rootSchema->hasDefinition($type)) {
-                $rootSchema->addDefinition($type, $definitionSchema = new Schema());
-                $extractionContext->getSwagger()->extract(
-                    new ReflectionClass($type),
-                    $definitionSchema,
-                    $extractionContext
-                );
-            }
-
-            $schema->ref = $rootSchema->getDefinitionReference($type);
+        if(is_null($type)) {
+            return $schema;
         }
+
+        $primitiveType = $this->getPrimitiveType($type);
+
+        if ($primitiveType['type'] != "object") {
+            $schema->type = $primitiveType['type'];
+            if(array_key_exists('format',$primitiveType)) {
+                $schema->format = $primitiveType['format'];
+            }
+            return $schema;
+        }
+
+        $rootSchema = $extractionContext->getRootSchema();
+        if (!$rootSchema->hasDefinition($type)) {
+            $rootSchema->addDefinition($type, $definitionSchema = new Schema());
+            $definitionSchema->type = "object";
+            $extractionContext->getSwagger()->extract(
+                new ReflectionClass($type),
+                $definitionSchema,
+                $extractionContext
+            );
+        }
+        $schema->type = "object";
+        $schema->ref = $rootSchema->getDefinitionReference($type);
 
         return $schema;
     }
 
-    private function isPrimitive($type)
+    private function getPrimitiveType($type)
     {
-        return in_array($type, array('boolean', 'integer', 'string', 'float', 'double', 'array', 'DateTime', null));
+        $types = array(
+            'int' => array('type' => 'integer', 'format' => 'int32'),
+            'integer' => array('type' => 'integer', 'format' => 'int32'),
+            'long' => array('type' => 'integer', 'format' => 'int64'),
+            'float' => array('type' => 'number', 'format' => 'float'),
+            'double' => array('type' => 'number', 'format' => 'double'),
+            'string' => array('type' => 'string'),
+            'byte' => array('type' => 'string', 'format' => 'byte'),
+            'boolean' => array('type' => 'boolean'),
+            'date' => array('type' => 'string', 'format' => 'date'),
+            'DateTime' => array('type' => 'string', 'format' => 'date-time'),
+            'dateTime' => array('type' => 'string', 'format' => 'date-time'),
+            'password' => array('type' => 'string', 'format' => 'password')
+        );
+
+        if(array_key_exists($type, $types)) {
+            return $types[$type];
+        }
+
+        return array('type' => 'object');
     }
 
     /**

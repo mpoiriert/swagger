@@ -29,7 +29,8 @@ class Swagger implements VendorExtensionSupportInterface
      *
      * @var Info
      *
-     * @Assert\NotBlank()
+     * @Assert\NotNull()
+     * @Assert\Valid()
      * @JMS\Type("Draw\Swagger\Schema\Info")
      */
     public $info;
@@ -64,7 +65,7 @@ class Swagger implements VendorExtensionSupportInterface
      *
      * @var string[]
      *
-     * @Assert\Choice({"http","https","ws","wss"})
+     * @Assert\Choice({"http","https","ws","wss"}, multiple=true)
      * @JMS\Type("array<string>")
      */
     public $schemes;
@@ -97,6 +98,7 @@ class Swagger implements VendorExtensionSupportInterface
      * @var PathItem[]
      *
      * @Assert\NotBlank()
+     * @Assert\Valid()
      * @JMS\Type("array<string,Draw\Swagger\Schema\PathItem>")
      */
     public $paths;
@@ -106,6 +108,7 @@ class Swagger implements VendorExtensionSupportInterface
      *
      * @var Schema[]
      *
+     * @Assert\Valid()
      * @JMS\Type("array<string,Draw\Swagger\Schema\Schema>")
      */
     public $definitions;
@@ -116,6 +119,7 @@ class Swagger implements VendorExtensionSupportInterface
      *
      * @var Parameter[]
      *
+     * @Assert\Valid()
      * @JMS\Type("array<Draw\Swagger\Schema\BaseParameter>")
      */
     public $parameters;
@@ -124,7 +128,8 @@ class Swagger implements VendorExtensionSupportInterface
      * An object to hold responses that can be used across operations.
      * This property does not define global responses for all operations.
      *
-     * @var \Draw\Swagger\Schema\Reponses
+     * @Assert\Valid()
+     * @var Response
      */
     public $responses;
 
@@ -132,6 +137,8 @@ class Swagger implements VendorExtensionSupportInterface
      * Security scheme definitions that can be used across the specification.
      *
      * @var SecurityScheme[]
+     *
+     * @Assert\Valid()
      *
      * @JMS\Type("array<string,Draw\Swagger\Schema\SecurityScheme>")
      * @JMS\SerializedName("securityDefinitions")
@@ -145,6 +152,8 @@ class Swagger implements VendorExtensionSupportInterface
      * Individual operations can override this definition.
      *
      * @var SecurityRequirement[]
+     *
+     * @Assert\Valid()
      *
      * @JMS\Type("array<Draw\Swagger\Schema\SecurityRequirement>")
      */
@@ -167,6 +176,8 @@ class Swagger implements VendorExtensionSupportInterface
      * Additional external documentation.
      *
      * @var ExternalDocumentation
+     *
+     * @Assert\Valid()
      *
      * @JMS\Type("Draw\Swagger\Schema\ExternalDocumentation")
      * @JMS\SerializedName("externalDocs")

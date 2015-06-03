@@ -26,7 +26,7 @@ class Header
      *
      * @var string
      *
-     * @Assert\NotBlank()
+     * @Assert\NotNull()
      * @Assert\Choice({"string","number","integer","boolean","array"})
      * @JMS\Type("string")
      */
@@ -46,6 +46,8 @@ class Header
      *
      * @var Items
      *
+     * @Assert\Valid()
+     *
      * @JMS\Type("Draw\Swagger\Schema\Items")
      */
     public $items;
@@ -63,6 +65,7 @@ class Header
      * @var string
      *
      * @Assert\Choice({"csv","ssv","tsv","pipes"})
+     *
      * @JMS\Type("string")
      * @JMS\SerializedName("collectionFormat")
      */

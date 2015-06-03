@@ -15,7 +15,8 @@ class BodyParameter extends BaseParameter
      *
      * @var Schema
      *
-     * @Assert\NotBlank()
+     * @Assert\NotNull()
+     * @Assert\Valid()
      * @JMS\Type("Draw\Swagger\Schema\Schema")
      */
     public $schema;

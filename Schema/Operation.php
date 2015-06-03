@@ -48,6 +48,8 @@ class Operation
      *
      * @var ExternalDocumentation
      *
+     * @Assert\Valid()
+     *
      * @JMS\Type("Draw\Swagger\Schema\ExternalDocumentation")
      */
     public $externalDocs;
@@ -58,6 +60,7 @@ class Operation
      * Tools and libraries MAY use the operation id to uniquely identify an operation.
      *
      * @var string
+     *
      * @JMS\Type("string")
      * @JMS\SerializedName("operationId")
      */
@@ -93,7 +96,9 @@ class Operation
      * The list can use the Reference Object to link to parameters that are defined at the Swagger Object's parameters.
      * There can be one "body" parameter at most.
      *
-     * @var Parameter[]
+     * @var BaseParameter[]
+     *
+     * @Assert\Valid()
      *
      * @JMS\Type("array<Draw\Swagger\Schema\BaseParameter>")
      */
@@ -104,17 +109,20 @@ class Operation
      *
      * @var Response[]
      *
-     * @Assert\NotBlank()
+     * @Assert\NotNull()
+     * @Assert\Valid()
+     *
      * @JMS\Type("array<string,Draw\Swagger\Schema\Response>")
      */
     public $responses = array();
 
     /**
-     * The transfer protocol for the operation. Values MUST be from the list: "http", "https", "ws", "wss". The value overrides the Swagger Object schemes definition.
+     * The transfer protocol for the operation. Values MUST be from the list: "http", "https", "ws", "wss".
+     * The value overrides the Swagger Object schemes definition.
      *
      * @var string[]
      *
-     * @Assert\Choice({"http","https","ws","wss"})
+     * @Assert\Choice({"http","https","ws","wss"}, multiple=true)
      * @JMS\Type("array<string>")
      */
     public $schemes;
@@ -138,6 +146,8 @@ class Operation
      * To remove a top-level security declaration, an empty array can be used.
      *
      * @var SecurityRequirement[]
+     *
+     * @Assert\Valid()
      *
      * @JMS\Type("array<Draw\Swagger\Schema\SecurityRequirement>")
      */

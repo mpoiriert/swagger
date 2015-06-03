@@ -41,16 +41,6 @@ abstract class BaseParameter
     public $name;
 
     /**
-     * The location of the parameter. Possible values are "query", "header", "path", "formData" or "body".
-     *
-     * @var string
-     *
-     * @Assert\Choice({"query","header","path","formData","body"})
-     * @Assert\NotBlank()
-     */
-    public $_in;
-
-    /**
      * A brief description of the parameter. This could contain examples of use.
      * GFM syntax can be used for rich text representation.
      *

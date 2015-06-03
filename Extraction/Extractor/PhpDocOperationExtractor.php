@@ -116,6 +116,9 @@ class PhpDocOperationExtractor implements ExtractorInterface
 
                 if (!$parameter->type) {
                     $parameter->type = $paramTag->getType();
+                    if($parameter->type == "DateTime") {
+
+                    }
                 }
                 continue;
             }
@@ -146,6 +149,7 @@ class PhpDocOperationExtractor implements ExtractorInterface
                 $schema,
                 $extractionContext
             );
+            $schema->type = "object";
         } else {
             $schema->type = $type;
         }

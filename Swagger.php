@@ -2,6 +2,7 @@
 
 namespace Draw\Swagger;
 
+use Doctrine\Common\Annotations\AnnotationReader;
 use Draw\Swagger\Extraction\ExtractionContext;
 use Draw\Swagger\Extraction\ExtractionContextInterface;
 use Draw\Swagger\Extraction\ExtractorInterface;
@@ -10,6 +11,8 @@ use JMS\Serializer\EventDispatcher\EventDispatcher;
 use JMS\Serializer\SerializerBuilder;
 use JMS\Serializer\SerializerInterface;
 use Draw\Swagger\Schema\Swagger as Schema;
+use Symfony\Component\Validator\Constraint;
+use Symfony\Component\Validator\Validation;
 
 /**
  * Class Generator
@@ -59,6 +62,15 @@ class Swagger
      */
     public function dump(Schema $schema)
     {
+        $validator = Validation::createValidatorBuilder()
+            ->enableAnnotationMapping(new AnnotationReader())
+            ->getValidator();
+        $result = $validator->validate($schema, array(Constraint::DEFAULT_GROUP), true, true);
+
+        if(count($result)) {
+            throw new \InvalidArgumentException("" . $result);
+        }
+
         return $this->serializer->serialize($schema, 'json');
     }
 
@@ -73,12 +85,12 @@ class Swagger
             $type = new Schema();
         }
 
-        if(is_null($extractionContext)) {
+        if (is_null($extractionContext)) {
             $extractionContext = new ExtractionContext($this, $type);
         }
 
-        foreach($this->getSortedExtractors() as $extractor) {
-            if($extractor->canExtract($source, $type, $extractionContext)) {
+        foreach ($this->getSortedExtractors() as $extractor) {
+            if ($extractor->canExtract($source, $type, $extractionContext)) {
                 $extractor->extract($source, $type, $extractionContext);
             }
         }
@@ -91,9 +103,9 @@ class Swagger
      */
     private function getSortedExtractors()
     {
-        if(is_null($this->sortedExtractors)) {
+        if (is_null($this->sortedExtractors)) {
             $this->sortedExtractors = array();
-            foreach($this->extractors as $section => $extractors) {
+            foreach ($this->extractors as $section => $extractors) {
                 ksort($extractors);
                 $this->sortedExtractors = call_user_func_array('array_merge', $extractors);
             }

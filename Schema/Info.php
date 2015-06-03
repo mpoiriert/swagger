@@ -2,7 +2,7 @@
 
 namespace Draw\Swagger\Schema;
 
-use Doctrine\Common\Annotations\Annotation\Required;
+use Symfony\Component\Validator\Constraints as Assert;
 use JMS\Serializer\Annotation as JMS;
 
 /**
@@ -17,7 +17,7 @@ class Info
      *
      * @var string
      *
-     * @Required()
+     * @Assert\NotNull()
      * @JMS\Type("string")
      */
     public $title;
@@ -49,6 +49,8 @@ class Info
      * @var Contact
      *
      * @JMS\Type("Draw\Swagger\Schema\Contact")
+     *
+     * @Assert\Valid()
      */
     public $contact;
 
@@ -58,6 +60,8 @@ class Info
      * @var License
      *
      * @JMS\Type("Draw\Swagger\Schema\License")
+     *
+     * @Assert\Valid()
      */
     public $license;
 
@@ -66,7 +70,7 @@ class Info
      *
      * @var string
      *
-     * @Required()
+     * @Assert\NotBlank()
      * @JMS\Type("string")
      */
     public $version;

@@ -3,6 +3,7 @@
 namespace Draw\Swagger\Schema;
 
 use JMS\Serializer\Annotation as JMS;
+use Symfony\Component\Validator\Constraints as Assert;
 
 /**
  * @author Martin Poirier Theoret <mpoiriert@gmail.com>
@@ -140,6 +141,8 @@ class Schema
      * @var string
      *
      * @JMS\Type("string")
+     *
+     * @Assert\NotBlank()
      */
     public $type;
 

@@ -3,6 +3,7 @@
 namespace Draw\Swagger\Schema;
 
 use JMS\Serializer\Annotation as JMS;
+use Symfony\Component\Validator\Constraints as Assert;
 
 /**
  * @author Martin Poirier Theoret <mpoiriert@gmail.com>
@@ -15,6 +16,9 @@ class PathItem
      * A definition of a GET operation on this path.
      *
      * @var Operation
+     *
+     * @Assert\Valid()
+     *
      * @JMS\Type("Draw\Swagger\Schema\Operation")
      */
     public $get;
@@ -23,6 +27,9 @@ class PathItem
      * A definition of a PUT operation on this path.
      *
      * @var Operation
+     *
+     * @Assert\Valid()
+     *
      * @JMS\Type("Draw\Swagger\Schema\Operation")
      */
     public $put;
@@ -31,6 +38,9 @@ class PathItem
      * A definition of a POST operation on this path.
      *
      * @var Operation
+     *
+     * @Assert\Valid()
+     *
      * @JMS\Type("Draw\Swagger\Schema\Operation")
      */
     public $post;
@@ -39,6 +49,9 @@ class PathItem
      * A definition of a DELETE operation on this path.
      *
      * @var Operation
+     *
+     * @Assert\Valid()
+     *
      * @JMS\Type("Draw\Swagger\Schema\Operation")
      */
     public $delete;
@@ -47,6 +60,9 @@ class PathItem
      * A definition of a OPTIONS operation on this path.
      *
      * @var Operation
+     *
+     * @Assert\Valid()
+     *
      * @JMS\Type("Draw\Swagger\Schema\Operation")
      */
     public $options;
@@ -55,6 +71,9 @@ class PathItem
      * A definition of a HEAD operation on this path.
      *
      * @var Operation
+     *
+     * @Assert\Valid()
+     *
      * @JMS\Type("Draw\Swagger\Schema\Operation")
      */
     public $head;
@@ -63,6 +82,9 @@ class PathItem
      * A definition of a PATCH operation on this path.
      *
      * @var Operation
+     *
+     * @Assert\Valid()
+     *
      * @JMS\Type("Draw\Swagger\Schema\Operation")
      */
     public $patch;
@@ -75,7 +97,10 @@ class PathItem
      * The list can use the Reference Object to link to parameters that are defined at the Swagger Object's parameters.
      * There can be one "body" parameter at most.
      *
-     * @var Operation
+     * @var BaseParameter[]
+     *
+     * @Assert\Valid()
+     *
      * @JMS\Type("array<Draw\Swagger\Schema\BaseParameter>")
      */
     public $parameters;
