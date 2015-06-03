@@ -67,4 +67,9 @@ class ExtractionContext implements ExtractionContextInterface
     {
         $this->parameters = $parameters;
     }
+
+    public function createSubContext()
+    {
+        return clone $this;
+    }
 }

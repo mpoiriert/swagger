@@ -80,7 +80,7 @@ class JmsExtractor implements ExtractorInterface
 
         $exclusionStrategies = array();
 
-        if ($groups = $extractionContext->getParameter('jms-groups', array())) {
+        if ($groups = $extractionContext->getParameter('serializer-groups', array())) {
             $exclusionStrategies[] = new GroupsExclusionStrategy($groups);
         }
 

@@ -46,4 +46,9 @@ interface ExtractionContextInterface
      * @param array $parameters
      */
     public function setParameters(array $parameters);
+
+    /**
+     * @return ExtractionContextInterface
+     */
+    public function createSubContext();
 }

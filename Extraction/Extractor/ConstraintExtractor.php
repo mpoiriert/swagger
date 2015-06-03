@@ -58,14 +58,18 @@ abstract class ConstraintExtractor implements ConstraintExtractorInterface
             return false;
         }
 
-        return count($this->getPropertiesConstraints($source, $type)) > 0;
+        return count($this->getPropertiesConstraints($source, $type, $extractionContext->getParameter('validation-groups'))) > 0;
     }
 
-    private function getPropertiesConstraints(ReflectionClass $reflectionClass, Schema $schema)
+    private function getPropertiesConstraints(ReflectionClass $reflectionClass, Schema $schema, array $groups = null)
     {
         $class = $reflectionClass->getName();
         if (!$this->metadataFactory->hasMetadataFor($class)) {
             return array();
+        }
+
+        if(is_null($groups)) {
+            $groups = array(Constraint::DEFAULT_GROUP);
         }
 
         $constraints = array();
@@ -73,6 +77,8 @@ abstract class ConstraintExtractor implements ConstraintExtractorInterface
         /* @var \Symfony\Component\Validator\Mapping\ClassMetadataInterface $classMetadata */
 
         foreach ($classMetadata->getConstrainedProperties() as $propertyName) {
+
+            //This is to prevent hading properties just because they have validation
             if (!isset($schema->properties[$propertyName])) {
                 continue;
             }
@@ -80,12 +86,29 @@ abstract class ConstraintExtractor implements ConstraintExtractorInterface
             $constraints[$propertyName] = array();
             foreach ($classMetadata->getPropertyMetadata($propertyName) as $propertyMetadata) {
                 /* @var $propertyMetadata */
-                $propertyConstraints = array_filter(
-                    $propertyMetadata->findConstraints(Constraint::DEFAULT_GROUP),
+
+                $propertyConstraints = array();
+                foreach($groups as $group) {
+                    $propertyConstraints = array_merge(
+                        $propertyConstraints,
+                        $propertyMetadata->findConstraints($group)
+                    );
+                }
+
+                $finalPropertyConstraints  = array();
+
+                foreach ($propertyConstraints as $current) {
+                    if ( ! in_array($current, $finalPropertyConstraints)) {
+                        $finalPropertyConstraints[] = $current;
+                    }
+                }
+
+                $finalPropertyConstraints = array_filter(
+                    $finalPropertyConstraints,
                     array($this, 'supportConstraint')
                 );
 
-                $constraints[$propertyName] = array_merge($constraints[$propertyName], $propertyConstraints);
+                $constraints[$propertyName] = array_merge($constraints[$propertyName], $finalPropertyConstraints);
             }
         }
 
@@ -111,7 +134,12 @@ abstract class ConstraintExtractor implements ConstraintExtractorInterface
         $constraintExtractionContext = new ConstraintExtractionContext();
         $constraintExtractionContext->classSchema = $target;
         $constraintExtractionContext->context = "property";
-        foreach ($this->getPropertiesConstraints($source, $target) as $propertyName => $constraints) {
+
+        $validationGroups = $extractionContext->getParameter('validation-groups');
+
+        $propertyConstraints = $this->getPropertiesConstraints($source, $target, $validationGroups);
+
+        foreach ($propertyConstraints as $propertyName => $constraints) {
             foreach ($constraints as $constraint) {
                 $constraintExtractionContext->propertySchema = $target->properties[$propertyName];
                 $constraintExtractionContext->propertyName = $propertyName;
