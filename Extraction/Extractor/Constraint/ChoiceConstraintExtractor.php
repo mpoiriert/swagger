@@ -3,7 +3,6 @@
 namespace Draw\Swagger\Extraction\Extractor\Constraint;
 
 use Draw\Swagger\Extraction\Extractor\ConstraintExtractor;
-use Draw\Swagger\Schema\Mixed;
 use Symfony\Component\Validator\Constraint;
 use Symfony\Component\Validator\Constraints\Choice as SupportedConstraint;
 
@@ -40,7 +39,7 @@ class ChoiceConstraintExtractor extends ConstraintExtractor
         }
 
         foreach($choices as $choice) {
-            $context->propertySchema->enum[] = new Mixed($choice);
+            $context->propertySchema->enum[] = $choice;
         }
     }
 }

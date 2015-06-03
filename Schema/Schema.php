@@ -223,4 +223,14 @@ class Schema
      * @JMS\SerializedName("$ref")
      */
     public $ref;
+
+    /**
+     * @JMS\PreSerialize()
+     */
+    public function preSerialize()
+    {
+        $this->default = Mixed::convert($this->default);
+        $this->example = Mixed::convert($this->example);
+        $this->enum = Mixed::convert($this->enum, true);
+    }
 } 

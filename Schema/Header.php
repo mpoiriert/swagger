@@ -194,4 +194,13 @@ class Header
      * @JMS\SerializedName("multipleOf")
      */
     public $multipleOf;
+
+    /**
+     * @JMS\PreSerialize()
+     */
+    public function preSerialize()
+    {
+        $this->default = Mixed::convert($this->default);
+        $this->enum = Mixed::convert($this->enum, true);
+    }
 } 
