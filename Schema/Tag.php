@@ -5,6 +5,10 @@ namespace Draw\Swagger\Schema;
 use Symfony\Component\Validator\Constraints as Assert;
 use JMS\Serializer\Annotation as JMS;
 
+/**
+ * @Annotation
+ * @Target({"METHOD"})
+ */
 class Tag
 {
     /**
