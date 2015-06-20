@@ -119,9 +119,6 @@ class PhpDocOperationExtractor implements ExtractorInterface
 
                 if (!$parameter->type) {
                     $parameter->type = $paramTag->getType();
-                    if ($parameter->type == "DateTime") {
-
-                    }
                 }
                 continue;
             }

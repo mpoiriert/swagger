@@ -53,11 +53,14 @@ class TypeSchemaExtractor implements ExtractorInterface
 
         if($target->type == 'array') {
             $target->items = $itemsSchema = new Schema();
-            $extractionContext->getSwagger()->extract(
-                $primitiveType['subType'],
-                $itemsSchema,
-                $extractionContext
-            );
+            if(isset($primitiveType['subType'])) {
+                $extractionContext->getSwagger()->extract(
+                    $primitiveType['subType'],
+                    $itemsSchema,
+                    $extractionContext
+                );
+            }
+
             return;
         }
 
@@ -128,7 +131,8 @@ class TypeSchemaExtractor implements ExtractorInterface
             'date' => array('type' => 'string', 'format' => 'date'),
             'DateTime' => array('type' => 'string', 'format' => 'date-time'),
             'dateTime' => array('type' => 'string', 'format' => 'date-time'),
-            'password' => array('type' => 'string', 'format' => 'password')
+            'password' => array('type' => 'string', 'format' => 'password'),
+            'array' => array('type' => 'array')
         );
 
         if(array_key_exists($type, $types)) {
