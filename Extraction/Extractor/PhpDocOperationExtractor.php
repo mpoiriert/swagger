@@ -62,7 +62,10 @@ class PhpDocOperationExtractor implements ExtractorInterface
                 $response->schema = $responseSchema = new Schema();
                 $operation->responses[200] = $response;
 
-                $extractionContext->getSwagger()->extract($type, $responseSchema, $extractionContext);
+                $subContext = $extractionContext->createSubContext();
+                $subContext->setParameter('direction','out');
+
+                $extractionContext->getSwagger()->extract($type, $responseSchema, $subContext);
             }
         }
 
@@ -133,7 +136,9 @@ class PhpDocOperationExtractor implements ExtractorInterface
                     }
 
                     if (!$parameter->type) {
-                        $extractionContext->getSwagger()->extract($paramTag->getType(), $parameter, $extractionContext);
+                        $subContext = $extractionContext->createSubContext();
+                        $subContext->setParameter('direction','in');
+                        $extractionContext->getSwagger()->extract($paramTag->getType(), $parameter, $subContext);
                     }
 
                     continue;

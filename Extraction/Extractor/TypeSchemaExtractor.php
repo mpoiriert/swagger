@@ -65,8 +65,21 @@ class TypeSchemaExtractor implements ExtractorInterface
             $reflectionClass = new \ReflectionClass($primitiveType['class']);
             $name = $reflectionClass->getName();
             $rootSchema = $extractionContext->getRootSchema();
-            if(!$rootSchema->hasDefinition($name)) {
-                $rootSchema->addDefinition($name, $refSchema = new Schema());
+
+            if($direction = $extractionContext->getParameter('direction')) {
+                $context = $extractionContext->getParameter($direction . '-model-context');
+            } else {
+                $context = $extractionContext->getParameter('model-context');
+            }
+
+            if($context) {
+                $definitionName = $name . '?' . urldecode(http_build_query($context));
+            } else {
+                $definitionName = $name;
+            }
+
+            if(!$rootSchema->hasDefinition($definitionName)) {
+                $rootSchema->addDefinition($definitionName, $refSchema = new Schema());
                 $refSchema->type = "object";
                 $extractionContext->getSwagger()->extract(
                     $reflectionClass,
@@ -75,7 +88,7 @@ class TypeSchemaExtractor implements ExtractorInterface
                 );
             }
 
-            $target->ref = $rootSchema->getDefinitionReference($name);
+            $target->ref = $rootSchema->getDefinitionReference($definitionName);
             return;
         }
 

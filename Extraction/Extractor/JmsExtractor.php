@@ -80,7 +80,20 @@ class JmsExtractor implements ExtractorInterface
 
         $exclusionStrategies = array();
 
-        if ($groups = $extractionContext->getParameter('serializer-groups', array())) {
+        $subContext = $extractionContext->createSubContext();
+
+        switch ($extractionContext->getParameter('direction')) {
+            case 'in':
+                $groups = $extractionContext->getParameter('deserializer-groups', array());
+                break;
+            case 'out';
+                $groups = $extractionContext->getParameter('serializer-groups', array());
+                break;
+            default:
+                $groups = array();
+        }
+
+        if ($groups) {
             $exclusionStrategies[] = new GroupsExclusionStrategy($groups);
         }
 
@@ -92,9 +105,9 @@ class JmsExtractor implements ExtractorInterface
             if ($type = $this->getNestedTypeInArray($item)) {
                 $propertySchema = new Schema();
                 $propertySchema->type = 'array';
-                $propertySchema->items = $this->extractTypeSchema($type, $extractionContext);
+                $propertySchema->items = $this->extractTypeSchema($type, $subContext);
             } else {
-                $propertySchema = $this->extractTypeSchema($item->type['name'], $extractionContext);
+                $propertySchema = $this->extractTypeSchema($item->type['name'], $subContext);
             }
 
             if ($item->readOnly) {
@@ -110,6 +123,7 @@ class JmsExtractor implements ExtractorInterface
     private function extractTypeSchema($type, ExtractionContext $extractionContext)
     {
         $extractionContext->getSwagger()->extract($type, $schema = new Schema(), $extractionContext);
+
         return $schema;
     }
 
