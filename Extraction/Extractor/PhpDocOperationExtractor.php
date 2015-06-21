@@ -55,6 +55,14 @@ class PhpDocOperationExtractor implements ExtractorInterface
 
         $docBlock = new DocBlock($method->getDocComment());
 
+        if(!$operation->summary) {
+            $operation->summary = $docBlock->getShortDescription();
+        }
+
+        if($operation->description) {
+            $operation->description = $docBlock->getLongDescription();
+        }
+
         foreach ($docBlock->getTagsByName('return') as $returnTag) {
             /* @var $returnTag \phpDocumentor\Reflection\DocBlock\Tag\ReturnTag */
             foreach ($returnTag->getTypes() as $type) {
@@ -67,6 +75,10 @@ class PhpDocOperationExtractor implements ExtractorInterface
 
                 $extractionContext->getSwagger()->extract($type, $responseSchema, $subContext);
             }
+        }
+
+        if($docBlock->getTagsByName('deprecated')) {
+           $operation->deprecated = true;
         }
 
         foreach ($docBlock->getTagsByName('throws') as $throwTag) {

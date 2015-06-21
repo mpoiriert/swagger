@@ -76,10 +76,12 @@ class TypeSchemaExtractor implements ExtractorInterface
             }
 
             if($context) {
-                $definitionName = $name . '?' . urldecode(http_build_query($context));
+                $definitionName = $name . '?' . md5(urldecode(http_build_query($context)));
             } else {
                 $definitionName = $name;
             }
+
+            $definitionName = str_replace('\\','.', $definitionName);
 
             if(!$rootSchema->hasDefinition($definitionName)) {
                 $rootSchema->addDefinition($definitionName, $refSchema = new Schema());
