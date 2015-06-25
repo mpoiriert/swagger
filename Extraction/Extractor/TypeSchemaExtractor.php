@@ -11,6 +11,18 @@ use Draw\Swagger\Schema\Schema;
 class TypeSchemaExtractor implements ExtractorInterface
 {
     /**
+     * @var string[]
+     */
+    private $definitionAliases = array();
+
+    private $definitionHashes = array();
+
+    public function registerDefinitionAlias($definition, $alias)
+    {
+        $this->definitionAliases[$definition] = $alias;
+    }
+
+    /**
      * Return if the extractor can extract the requested data or not.
      *
      * @param $source
@@ -75,8 +87,12 @@ class TypeSchemaExtractor implements ExtractorInterface
                 $context = $extractionContext->getParameter('model-context');
             }
 
+            if(array_key_exists($name, $this->definitionAliases)) {
+                $name = $this->definitionAliases[$name];
+            }
+
             if($context) {
-                $definitionName = $name . '?' . md5(urldecode(http_build_query($context)));
+                $definitionName = $name . '?' . $this->getHash($context);
             } else {
                 $definitionName = $name;
             }
@@ -100,6 +116,16 @@ class TypeSchemaExtractor implements ExtractorInterface
         if(isset($primitiveType['format'])) {
             $target->format = $primitiveType['format'];
         }
+    }
+
+    private function getHash(array $context)
+    {
+        $hash = md5(http_build_query($context));
+        if(false === ($index = array_search($hash, $this->definitionHashes))) {
+            $this->definitionHashes[] = $hash;
+        }
+
+        return array_search($hash, $this->definitionHashes);
     }
 
     private function getPrimitiveType($type)
