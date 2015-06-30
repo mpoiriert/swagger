@@ -68,6 +68,7 @@ class PhpDocOperationExtractor implements ExtractorInterface
             foreach ($returnTag->getTypes() as $type) {
                 $response = new Response();
                 $response->schema = $responseSchema = new Schema();
+                $response->description = $returnTag->getDescription();
                 $operation->responses[200] = $response;
 
                 $subContext = $extractionContext->createSubContext();
