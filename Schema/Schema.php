@@ -77,6 +77,14 @@ class Schema
     public $maxLength;
 
     /**
+     * @var integer
+     *
+     * @JMS\Type("integer")
+     * @JMS\SerializedName("minLength")
+     */
+    public $minLength;
+
+    /**
      * @var string
      *
      * @JMS\Type("string")

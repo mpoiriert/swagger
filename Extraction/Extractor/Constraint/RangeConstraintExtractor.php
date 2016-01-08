@@ -4,9 +4,9 @@ namespace Draw\Swagger\Extraction\Extractor\Constraint;
 
 use Draw\Swagger\Extraction\Extractor\ConstraintExtractor;
 use Symfony\Component\Validator\Constraint;
-use Symfony\Component\Validator\Constraints\Length as SupportedConstraint;
+use Symfony\Component\Validator\Constraints\Range as SupportedConstraint;
 
-class LengthConstraintExtractor extends ConstraintExtractor
+class RangeConstraintExtractor extends ConstraintExtractor
 {
     /**
      * @param Constraint $constraint
@@ -24,7 +24,7 @@ class LengthConstraintExtractor extends ConstraintExtractor
     public function extractConstraint(Constraint $constraint, ConstraintExtractionContext $context)
     {
         $this->assertSupportConstraint($constraint);
-        $context->propertySchema->maxLength = $constraint->max;
-        $context->propertySchema->minLength = $constraint->min;
+        $context->propertySchema->maximum = $constraint->max;
+        $context->propertySchema->minimum = $constraint->min;
     }
 }
