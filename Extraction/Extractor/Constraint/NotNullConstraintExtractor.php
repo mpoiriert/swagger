@@ -24,6 +24,9 @@ class NotNullConstraintExtractor extends ConstraintExtractor
     public function extractConstraint(Constraint $constraint, ConstraintExtractionContext $context)
     {
         $this->assertSupportConstraint($constraint);
+        if(!in_array($context->propertyName, $context->classSchema->required)) {
+            $context->classSchema->required[] = $context->propertyName;
+        }
         $context->classSchema->required[] = $context->propertyName;
     }
 }
