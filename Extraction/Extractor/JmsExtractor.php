@@ -84,13 +84,16 @@ class JmsExtractor implements ExtractorInterface
 
         switch ($extractionContext->getParameter('direction')) {
             case 'in':
-                $groups = $extractionContext->getParameter('deserializer-groups', array());
+                $modelContext = $subContext->getParameter('in-model-context', array());
                 break;
             case 'out';
-                $groups = $extractionContext->getParameter('serializer-groups', array());
+                $modelContext = $subContext->getParameter('out-model-context', array());
                 break;
-            default:
-                $groups = array();
+        }
+
+        $groups = [];
+        if(array_key_exists('serializer-groups', $modelContext)) {
+            $groups = $modelContext['serializer-groups'];
         }
 
         if ($groups) {

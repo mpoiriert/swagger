@@ -91,8 +91,8 @@ class TypeSchemaExtractor implements ExtractorInterface
                 $name = $this->definitionAliases[$name];
             }
 
-            if($context) {
-                $definitionName = $name . '?' . $this->getHash($context);
+            if($context && $hash = $this->getHash($name, $context)) {
+                $definitionName = $name . '?' . $hash;
             } else {
                 $definitionName = $name;
             }
@@ -118,11 +118,16 @@ class TypeSchemaExtractor implements ExtractorInterface
         }
     }
 
-    private function getHash(array $context)
+    private function getHash($modelName, array $context)
     {
         $hash = md5(http_build_query($context));
-        if(false === ($index = array_search($hash, $this->definitionHashes))) {
-            $this->definitionHashes[] = $hash;
+
+        if(!array_key_exists($modelName, $this->definitionHashes)) {
+            $this->definitionHashes[$modelName] = [];
+        }
+
+        if(false === ($index = array_search($hash, $this->definitionHashes[$modelName]))) {
+            $this->definitionHashes[$modelName][] = $hash;
         }
 
         return array_search($hash, $this->definitionHashes);

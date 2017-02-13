@@ -112,4 +112,17 @@ class PathItem
      * @JMS\SerializedName("$ref")
      */
     public $ref;
+
+    public function getOperations()
+    {
+        $operations = [];
+        foreach($this as $key => $value) {
+            if(!$value instanceof Operation) {
+                continue;
+            }
+            $operations[$key] = $value;
+        }
+
+        return $operations;
+    }
 } 
