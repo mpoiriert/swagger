@@ -230,6 +230,6 @@ class Swagger implements VendorExtensionSupportInterface
 
     public function sanitizeReferenceName($name)
     {
-        return trim(str_replace('\\', '/', $name), '/');
+        return trim(str_replace('\\', '.', $name), '.');
     }
 }

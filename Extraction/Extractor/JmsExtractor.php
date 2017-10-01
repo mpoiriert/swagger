@@ -82,6 +82,7 @@ class JmsExtractor implements ExtractorInterface
 
         $subContext = $extractionContext->createSubContext();
 
+        $modelContext = [];
         switch ($extractionContext->getParameter('direction')) {
             case 'in':
                 $modelContext = $subContext->getParameter('in-model-context', array());
@@ -92,8 +93,8 @@ class JmsExtractor implements ExtractorInterface
         }
 
         $groups = [];
-        if(array_key_exists('serializer-groups', $modelContext)) {
-            $groups = $modelContext['serializer-groups'];
+        if(array_key_exists('jms-groups', $modelContext)) {
+            $groups = $modelContext['jms-groups'];
         }
 
         if ($groups) {

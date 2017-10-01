@@ -97,8 +97,6 @@ class TypeSchemaExtractor implements ExtractorInterface
                 $definitionName = $name;
             }
 
-            $definitionName = str_replace('\\','.', $definitionName);
-
             if(!$rootSchema->hasDefinition($definitionName)) {
                 $rootSchema->addDefinition($definitionName, $refSchema = new Schema());
                 $refSchema->type = "object";

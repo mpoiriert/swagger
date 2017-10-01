@@ -136,7 +136,7 @@ class Schema
      *
      * @JMS\Type("array<string>")
      */
-    public $required = [];
+    public $required;
 
     /**
      * @var Mixed[]

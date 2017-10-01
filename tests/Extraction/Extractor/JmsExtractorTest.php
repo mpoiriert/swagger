@@ -70,7 +70,7 @@ class JmsExtractorTest extends \PHPUnit_Framework_TestCase
 
         $extractor->extract($reflectionClass, $modelSchema, $context);
 
-        $jsonSchema = $context->getSwagger()->dump($context->getRootSchema());
+        $jsonSchema = $context->getSwagger()->dump($context->getRootSchema(), false);
 
         $this->assertJsonStringEqualsJsonString(
             file_get_contents(__DIR__ . '/fixture/jmsExtractorTestExtract.json'),

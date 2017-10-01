@@ -54,13 +54,26 @@ class Swagger
     public function registerExtractor(ExtractorInterface $extractorInterface, $position = 0, $section = 'default')
     {
         $this->extractors[$section][$position][] = $extractorInterface;
+        $this->sortedExtractors = null;
     }
 
     /**
      * @param Schema $schema
      * @return string
      */
-    public function dump(Schema $schema)
+    public function dump(Schema $schema, $validate = true)
+    {
+        if($validate) {
+            $this->validate($schema);
+        }
+
+        return $this->serializer->serialize($schema, 'json');
+    }
+
+    /**
+     * @param Schema $schema
+     */
+    public function validate(Schema $schema)
     {
         $validator = Validation::createValidatorBuilder()
             ->enableAnnotationMapping(new AnnotationReader())
@@ -70,8 +83,6 @@ class Swagger
         if(count($result)) {
             throw new \InvalidArgumentException("" . $result);
         }
-
-        return $this->serializer->serialize($schema, 'json');
     }
 
     /**

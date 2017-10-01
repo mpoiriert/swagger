@@ -1,0 +1,21 @@
+{
+  "swagger": "2.0",
+  "definitions": {
+    "fake-string": {
+      "type": "string"
+    },
+    "fake-strings": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      }
+    },
+    "object": {
+      "$ref": "#/definitions/Draw.Swagger.Extraction.Extractor.TypeExtractorStubModel",
+      "type": "object"
+    },
+    "Draw.Swagger.Extraction.Extractor.TypeExtractorStubModel": {
+      "type": "object"
+    }
+  }
+}

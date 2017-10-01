@@ -13,5 +13,5 @@
       }
     }
   },
-  "definitions": {"Draw\/Swagger\/Extraction\/Extractor\/PhpDocOperationExtractorStubService": {}}
+  "definitions": {"Draw.Swagger.Extraction.Extractor.PhpDocOperationExtractorStubService": {}}
 }
