@@ -10,6 +10,8 @@ use Draw\Swagger\Schema\Operation;
 use Draw\Swagger\Schema\Response;
 use Draw\Swagger\Schema\Schema;
 use phpDocumentor\Reflection\DocBlock;
+use phpDocumentor\Reflection\DocBlockFactory;
+use phpDocumentor\Reflection\Types\Compound;
 use ReflectionMethod;
 
 class PhpDocOperationExtractor implements ExtractorInterface
@@ -37,6 +39,11 @@ class PhpDocOperationExtractor implements ExtractorInterface
         return true;
     }
 
+    private function createDocBlock($comment)
+    {
+        return DocBlockFactory::createInstance()->create($comment);
+    }
+
     /**
      * Extract the requested data.
      *
@@ -53,22 +60,31 @@ class PhpDocOperationExtractor implements ExtractorInterface
             throw new ExtractionImpossibleException();
         }
 
-        $docBlock = new DocBlock($method->getDocComment());
+        $docBlock = $this->createDocBlock($method->getDocComment());
 
         if(!$operation->summary) {
-            $operation->summary = $docBlock->getShortDescription() ?: null;
+            $operation->summary = $docBlock->getSummary() ?: null;
         }
 
-        if($operation->description) {
-            $operation->description = $docBlock->getLongDescription() ?: null;
+        if(!$operation->description) {
+            $operation->description = (string)$docBlock->getDescription() ?: null;
         }
 
         foreach ($docBlock->getTagsByName('return') as $returnTag) {
-            /* @var $returnTag \phpDocumentor\Reflection\DocBlock\Tag\ReturnTag */
-            foreach ($returnTag->getTypes() as $type) {
+            /* @var $returnTag DocBlock\Tags\Return_ */
+
+            $type = $returnTag->getType();
+            // If multiple return types are specified in return tag, separate them
+            if ($type instanceof Compound) {
+                $types = explode('|', (string)$type);
+            } else {
+                $types = [(string)$type];
+            }
+
+            foreach ($types as $type) {
                 $response = new Response();
                 $response->schema = $responseSchema = new Schema();
-                $response->description = $returnTag->getDescription() ?: null;
+                $response->description = (string)$returnTag->getDescription() ?: null;
                 $operation->responses[200] = $response;
 
                 $subContext = $extractionContext->createSubContext();
@@ -83,24 +99,24 @@ class PhpDocOperationExtractor implements ExtractorInterface
         }
 
         foreach ($docBlock->getTagsByName('throws') as $throwTag) {
-            /* @var $throwTag \phpDocumentor\Reflection\DocBlock\Tag\ThrowsTag */
+            /* @var $throwTag DocBlock\Tags\Throws */
 
             $type = $throwTag->getType();
-            $exceptionClass = new \ReflectionClass($type);
+            $exceptionClass = new \ReflectionClass((string)$type);
             $exception = $exceptionClass->newInstanceWithoutConstructor();
             list($code, $message) = $this->getExceptionInformation($exception);
             $operation->responses[$code] = $exceptionResponse = new Response();
 
-            if ($throwTag->getDescription()) {
-                $message = $throwTag->getDescription();
+            if ((string)$throwTag->getDescription()) {
+                $message = (string)$throwTag->getDescription();
             } else {
                 if (!$message) {
-                    $exceptionClassDocBlock = new DocBlock($exceptionClass->getDocComment());
-                    $message = $exceptionClassDocBlock->getShortDescription();
+                    $exceptionClassDocBlock = $this->createDocBlock($exceptionClass->getDocComment());
+                    $message = $exceptionClassDocBlock->getSummary();
                 }
             }
 
-            $exceptionResponse->description = $message;
+            $exceptionResponse->description = (string)$message ?: null;
         }
 
         $bodyParameter = null;
@@ -113,7 +129,7 @@ class PhpDocOperationExtractor implements ExtractorInterface
         }
 
         foreach ($docBlock->getTagsByName('param') as $paramTag) {
-            /* @var $paramTag \phpDocumentor\Reflection\DocBlock\Tag\ParamTag */
+            /* @var $paramTag DocBlock\Tags\Param */
 
             $parameterName = trim($paramTag->getVariableName(), '$');
 
@@ -127,7 +143,7 @@ class PhpDocOperationExtractor implements ExtractorInterface
 
             if (!is_null($parameter)) {
                 if (!$parameter->description) {
-                    $parameter->description = $paramTag->getDescription();
+                    $parameter->description = (string)$paramTag->getDescription() ?: null;
                 }
 
                 if (!$parameter->type) {
@@ -142,7 +158,7 @@ class PhpDocOperationExtractor implements ExtractorInterface
                     $parameter = $bodyParameter->schema->properties[$parameterName];
 
                     if (!$parameter->description) {
-                        $parameter->description = $paramTag->getDescription();
+                        $parameter->description = (string)$paramTag->getDescription() ?: null;
                     }
 
                     if (!$parameter->type) {
