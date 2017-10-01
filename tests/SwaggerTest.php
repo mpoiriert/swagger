@@ -28,6 +28,6 @@ class SwaggerTest extends \PHPUnit_Framework_TestCase
         $schema = $swagger->extract(file_get_contents($file));
         $this->assertInstanceOf('Draw\Swagger\Schema\Swagger', $schema);
 
-        $this->assertJsonStringEqualsJsonString(file_get_contents($file), $swagger->dump($schema));
+        $this->assertJsonStringEqualsJsonString(file_get_contents($file), $swagger->dump($schema, false));
     }
 }

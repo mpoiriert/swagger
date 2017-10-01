@@ -56,11 +56,11 @@ class PhpDocOperationExtractor implements ExtractorInterface
         $docBlock = new DocBlock($method->getDocComment());
 
         if(!$operation->summary) {
-            $operation->summary = $docBlock->getShortDescription();
+            $operation->summary = $docBlock->getShortDescription() ?: null;
         }
 
         if($operation->description) {
-            $operation->description = $docBlock->getLongDescription();
+            $operation->description = $docBlock->getLongDescription() ?: null;
         }
 
         foreach ($docBlock->getTagsByName('return') as $returnTag) {
@@ -68,7 +68,7 @@ class PhpDocOperationExtractor implements ExtractorInterface
             foreach ($returnTag->getTypes() as $type) {
                 $response = new Response();
                 $response->schema = $responseSchema = new Schema();
-                $response->description = $returnTag->getDescription();
+                $response->description = $returnTag->getDescription() ?: null;
                 $operation->responses[200] = $response;
 
                 $subContext = $extractionContext->createSubContext();

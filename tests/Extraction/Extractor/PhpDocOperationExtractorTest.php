@@ -54,6 +54,7 @@ class PhpDocOperationExtractorTest extends \PHPUnit_Framework_TestCase
         $reflectionMethod = new \ReflectionMethod(__NAMESPACE__ . '\PhpDocOperationExtractorStubService', 'operation');
 
         $context = $this->getExtractionContext();
+        $context->getSwagger()->registerExtractor(new TypeSchemaExtractor());
         $schema = $context->getRootSchema();
         $schema->paths['/service'] = $pathItem = new PathItem();
 
@@ -63,7 +64,7 @@ class PhpDocOperationExtractorTest extends \PHPUnit_Framework_TestCase
 
         $this->assertJsonStringEqualsJsonString(
             file_get_contents(__DIR__ . '/fixture/phpDocOperationExtractorExtract.json'),
-            $context->getSwagger()->dump($context->getRootSchema())
+            $context->getSwagger()->dump($context->getRootSchema(), false)
         );
     }
 

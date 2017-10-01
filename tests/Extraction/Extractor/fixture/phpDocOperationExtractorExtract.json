@@ -1,17 +1,32 @@
 {
   "swagger": "2.0",
   "paths": {
-    "\/service": {
+    "/service": {
       "get": {
         "parameters": [],
         "responses": {
-          "200": {"schema": {"$ref": "#\/definitions\/Draw\/Swagger\/Extraction\/Extractor\/PhpDocOperationExtractorStubService"}},
-          "500": {"description": "When problem occur"},
-          "408": {"description": "Define message"},
-          "400": {"description": "The extraction is impossible"}
+          "200": {
+            "schema": {
+              "$ref": "#/definitions/Draw.Swagger.Extraction.Extractor.PhpDocOperationExtractorStubService",
+              "type": "object"
+            }
+          },
+          "500": {
+            "description": "When problem occur"
+          },
+          "408": {
+            "description": "Define message"
+          },
+          "400": {
+            "description": "The extraction is impossible"
+          }
         }
       }
     }
   },
-  "definitions": {"Draw.Swagger.Extraction.Extractor.PhpDocOperationExtractorStubService": {}}
+  "definitions": {
+    "Draw.Swagger.Extraction.Extractor.PhpDocOperationExtractorStubService": {
+      "type": "object"
+    }
+  }
 }
