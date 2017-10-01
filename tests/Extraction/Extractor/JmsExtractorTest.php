@@ -63,6 +63,9 @@ class JmsExtractorTest extends \PHPUnit_Framework_TestCase
         $reflectionClass = new \ReflectionClass(__NAMESPACE__ . '\JmsExtractorStubModel');
 
         $context = $this->getExtractionContext();
+
+        //Need to be there to validate that JMS extract it's type properly
+        $context->getSwagger()->registerExtractor(new TypeSchemaExtractor());
         $context->setParameter('jms-groups', array('test'));
         $schema = $context->getRootSchema();
 
@@ -128,6 +131,8 @@ class JmsExtractorStubModel
 
     /**
      * @var string
+     * @JMS\Exclude()
+     * @JMS\Groups("test")
      */
     public $notThere;
 

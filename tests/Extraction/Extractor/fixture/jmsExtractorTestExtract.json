@@ -6,19 +6,25 @@
         "virtual": {
           "description": "The virtual property.",
           "$ref": "#/definitions/Draw.Swagger.Extraction.Extractor.JmsExtractorStubModel",
-          "readOnly": true
+          "readOnly": true,
+          "type":"object"
         },
         "name": {
           "description": "The name",
-          "readOnly": true
+          "readOnly": true,
+          "type": "string"
         },
         "serializeProperty": {
-          "description": "Serialized property"
+          "description": "Serialized property",
+          "type": "string"
         },
         "array": {
           "description": "The array",
           "type": "array",
-          "items": {"$ref": "#/definitions/Draw.Swagger.Extraction.Extractor.JmsExtractorStubModel"}
+          "items": {
+            "$ref": "#/definitions/Draw.Swagger.Extraction.Extractor.JmsExtractorStubModel",
+            "type": "object"
+          }
         }
       }
     }

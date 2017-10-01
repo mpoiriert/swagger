@@ -82,20 +82,7 @@ class JmsExtractor implements ExtractorInterface
 
         $subContext = $extractionContext->createSubContext();
 
-        $modelContext = [];
-        switch ($extractionContext->getParameter('direction')) {
-            case 'in':
-                $modelContext = $subContext->getParameter('in-model-context', array());
-                break;
-            case 'out';
-                $modelContext = $subContext->getParameter('out-model-context', array());
-                break;
-        }
-
-        $groups = [];
-        if(array_key_exists('jms-groups', $modelContext)) {
-            $groups = $modelContext['jms-groups'];
-        }
+        $groups = $subContext->getParameter('jms-groups', []);
 
         if ($groups) {
             $exclusionStrategies[] = new GroupsExclusionStrategy($groups);
