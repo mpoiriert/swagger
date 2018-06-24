@@ -63,7 +63,7 @@ class PhpDocOperationExtractor implements ExtractorInterface
         $docBlock = $this->createDocBlock($method->getDocComment());
 
         if(!$operation->summary) {
-            $operation->summary = $docBlock->getSummary() ?: null;
+            $operation->summary = (string)$docBlock->getSummary() ?: null;
         }
 
         if(!$operation->description) {
@@ -101,7 +101,7 @@ class PhpDocOperationExtractor implements ExtractorInterface
         foreach ($docBlock->getTagsByName('throws') as $throwTag) {
             /* @var $throwTag DocBlock\Tags\Throws */
 
-            $type = $throwTag->getType();
+            $type = (string)$throwTag->getType();
             $exceptionClass = new \ReflectionClass((string)$type);
             $exception = $exceptionClass->newInstanceWithoutConstructor();
             list($code, $message) = $this->getExceptionInformation($exception);
@@ -147,7 +147,7 @@ class PhpDocOperationExtractor implements ExtractorInterface
                 }
 
                 if (!$parameter->type) {
-                    $parameter->type = $paramTag->getType();
+                    $parameter->type = (string)$paramTag->getType();
                 }
                 continue;
             }
