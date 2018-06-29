@@ -36,7 +36,7 @@ class TypeSchemaExtractor implements ExtractorInterface
             return false;
         }
 
-        if(is_null($this->getPrimitiveType($source))) {
+        if(is_null(self::getPrimitiveType($source))) {
             return false;
         }
 
@@ -52,6 +52,8 @@ class TypeSchemaExtractor implements ExtractorInterface
      * @param string $source
      * @param SupportedTarget $target
      * @param ExtractionContextInterface $extractionContext
+     *
+     * @throws ExtractionImpossibleException
      */
     public function extract($source, $target, ExtractionContextInterface $extractionContext)
     {
@@ -59,7 +61,7 @@ class TypeSchemaExtractor implements ExtractorInterface
             throw new ExtractionImpossibleException();
         }
 
-        $primitiveType = $this->getPrimitiveType($source);
+        $primitiveType = self::getPrimitiveType($source);
 
         $target->type = $primitiveType['type'];
 
@@ -77,6 +79,7 @@ class TypeSchemaExtractor implements ExtractorInterface
         }
 
         if($target->type == "object") {
+            $target->type = null;
             $reflectionClass = new \ReflectionClass($primitiveType['class']);
             $name = $reflectionClass->getName();
             $rootSchema = $extractionContext->getRootSchema();
@@ -131,7 +134,7 @@ class TypeSchemaExtractor implements ExtractorInterface
         return array_search($hash, $this->definitionHashes);
     }
 
-    private function getPrimitiveType($type)
+    public static function getPrimitiveType($type)
     {
         if(!is_string($type)) {
             return null;

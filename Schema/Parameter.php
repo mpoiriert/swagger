@@ -6,7 +6,8 @@ use Symfony\Component\Validator\Constraints as Assert;
 use JMS\Serializer\Annotation as JMS;
 
 /**
- * @author Martin Poirier Theoret <mpoiriert@gmail.com>
+ * @Annotation
+ * @Target({"METHOD"})
  */
 class Parameter extends BaseParameter
 {

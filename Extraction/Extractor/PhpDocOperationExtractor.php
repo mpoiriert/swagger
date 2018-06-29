@@ -147,7 +147,7 @@ class PhpDocOperationExtractor implements ExtractorInterface
                 }
 
                 if (!$parameter->type) {
-                    $parameter->type = (string)$paramTag->getType();
+                    $parameter->type = TypeSchemaExtractor::getPrimitiveType((string)$paramTag->getType())['type'];
                 }
                 continue;
             }
