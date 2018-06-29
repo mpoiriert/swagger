@@ -62,11 +62,11 @@ class PhpDocOperationExtractor implements ExtractorInterface
 
         $docBlock = $this->createDocBlock($method->getDocComment());
 
-        if(!$operation->summary) {
+        if (!$operation->summary) {
             $operation->summary = (string)$docBlock->getSummary() ?: null;
         }
 
-        if(!$operation->description) {
+        if (!$operation->description) {
             $operation->description = (string)$docBlock->getDescription() ?: null;
         }
 
@@ -88,14 +88,13 @@ class PhpDocOperationExtractor implements ExtractorInterface
                 $operation->responses[200] = $response;
 
                 $subContext = $extractionContext->createSubContext();
-                $subContext->setParameter('direction','out');
-
+                $subContext->setParameter('controller-reflection-method', $method);
                 $extractionContext->getSwagger()->extract($type, $responseSchema, $subContext);
             }
         }
 
-        if($docBlock->getTagsByName('deprecated')) {
-           $operation->deprecated = true;
+        if ($docBlock->getTagsByName('deprecated')) {
+            $operation->deprecated = true;
         }
 
         foreach ($docBlock->getTagsByName('throws') as $throwTag) {
@@ -146,7 +145,18 @@ class PhpDocOperationExtractor implements ExtractorInterface
                     $parameter->description = (string)$paramTag->getDescription() ?: null;
                 }
 
-                if (!$parameter->type) {
+                if ($parameter === $bodyParameter) {
+                    if (!$bodyParameter->schema) {
+                        $bodyParameter->schema = new Schema();
+                    }
+
+                    $subContext = $extractionContext->createSubContext();
+                    $extractionContext->getSwagger()->extract(
+                        (string)$paramTag->getType(),
+                        $bodyParameter->schema,
+                        $subContext
+                    );
+                } elseif (!$parameter->type) {
                     $parameter->type = TypeSchemaExtractor::getPrimitiveType((string)$paramTag->getType())['type'];
                 }
                 continue;
@@ -163,8 +173,7 @@ class PhpDocOperationExtractor implements ExtractorInterface
 
                     if (!$parameter->type) {
                         $subContext = $extractionContext->createSubContext();
-                        $subContext->setParameter('direction','in');
-                        $extractionContext->getSwagger()->extract($paramTag->getType(), $parameter, $subContext);
+                        $extractionContext->getSwagger()->extract((string)$paramTag->getType(), $parameter, $subContext);
                     }
 
                     continue;

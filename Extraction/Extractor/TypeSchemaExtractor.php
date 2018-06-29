@@ -36,7 +36,7 @@ class TypeSchemaExtractor implements ExtractorInterface
             return false;
         }
 
-        if(is_null(self::getPrimitiveType($source))) {
+        if (is_null(self::getPrimitiveType($source))) {
             return false;
         }
 
@@ -65,9 +65,9 @@ class TypeSchemaExtractor implements ExtractorInterface
 
         $target->type = $primitiveType['type'];
 
-        if($target->type == 'array') {
+        if ($target->type == 'array') {
             $target->items = $itemsSchema = new Schema();
-            if(isset($primitiveType['subType'])) {
+            if (isset($primitiveType['subType'])) {
                 $extractionContext->getSwagger()->extract(
                     $primitiveType['subType'],
                     $itemsSchema,
@@ -78,34 +78,29 @@ class TypeSchemaExtractor implements ExtractorInterface
             return;
         }
 
-        if($target->type == "object") {
+        if ($target->type == "object") {
             $target->type = null;
             $reflectionClass = new \ReflectionClass($primitiveType['class']);
             $name = $reflectionClass->getName();
             $rootSchema = $extractionContext->getRootSchema();
+            $context = $extractionContext->getParameter('model-context', []);
 
-            if($direction = $extractionContext->getParameter('direction')) {
-                $context = $extractionContext->getParameter($direction . '-model-context');
-            } else {
-                $context = $extractionContext->getParameter('model-context');
-            }
-
-            if(array_key_exists($name, $this->definitionAliases)) {
+            if (array_key_exists($name, $this->definitionAliases)) {
                 $name = $this->definitionAliases[$name];
             }
 
-            if($context && $hash = $this->getHash($name, $context)) {
+            if ($hash = $this->getHash($name, $context)) {
                 $definitionName = $name . '?' . $hash;
             } else {
                 $definitionName = $name;
             }
 
-            if(!$rootSchema->hasDefinition($definitionName)) {
+            if (!$rootSchema->hasDefinition($definitionName)) {
                 $rootSchema->addDefinition($definitionName, $refSchema = new Schema());
                 $refSchema->type = "object";
                 $extractionContext->getSwagger()->extract(
                     $reflectionClass,
-                    $refSchema ,
+                    $refSchema,
                     $extractionContext
                 );
             }
@@ -114,37 +109,41 @@ class TypeSchemaExtractor implements ExtractorInterface
             return;
         }
 
-        if(isset($primitiveType['format'])) {
+        if (isset($primitiveType['format'])) {
             $target->format = $primitiveType['format'];
         }
     }
 
-    private function getHash($modelName, array $context)
+    private function getHash($modelName, array $context = null)
     {
+        if (is_null($context)) {
+            $context = [];
+        }
+
         $hash = md5(http_build_query($context));
 
-        if(!array_key_exists($modelName, $this->definitionHashes)) {
+        if (!array_key_exists($modelName, $this->definitionHashes)) {
             $this->definitionHashes[$modelName] = [];
         }
 
-        if(false === ($index = array_search($hash, $this->definitionHashes[$modelName]))) {
+        if (false === ($index = array_search($hash, $this->definitionHashes[$modelName]))) {
             $this->definitionHashes[$modelName][] = $hash;
         }
 
-        return array_search($hash, $this->definitionHashes);
+        return array_search($hash, $this->definitionHashes[$modelName]);
     }
 
     public static function getPrimitiveType($type)
     {
-        if(!is_string($type)) {
+        if (!is_string($type)) {
             return null;
         }
 
         $primitiveType = array();
 
-        $typeOfArray = str_replace('[]','', $type);
-        if($typeOfArray != $type) {
-            if($typeOfArray !== substr($type,0,-2)) {
+        $typeOfArray = str_replace('[]', '', $type);
+        if ($typeOfArray != $type) {
+            if ($typeOfArray !== substr($type, 0, -2)) {
                 return null;
             }
 
@@ -169,11 +168,11 @@ class TypeSchemaExtractor implements ExtractorInterface
             'array' => array('type' => 'array')
         );
 
-        if(array_key_exists($type, $types)) {
+        if (array_key_exists($type, $types)) {
             return $types[$type];
         }
 
-        if(class_exists($type)) {
+        if (class_exists($type)) {
             return array(
                 'type' => 'object',
                 'class' => $type

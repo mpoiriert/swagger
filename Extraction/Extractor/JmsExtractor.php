@@ -83,10 +83,10 @@ class JmsExtractor implements ExtractorInterface
 
         $subContext = $extractionContext->createSubContext();
 
-        $groups = $subContext->getParameter('jms-groups', []);
+        $modelContext = $subContext->getParameter('model-context', []);
 
-        if ($groups) {
-            $exclusionStrategies[] = new GroupsExclusionStrategy($groups);
+        if (isset($modelContext['serializer-groups'])) {
+            $exclusionStrategies[] = new GroupsExclusionStrategy($modelContext['serializer-groups']);
         }
 
         foreach ($meta->propertyMetadata as $property => $item) {
@@ -112,7 +112,7 @@ class JmsExtractor implements ExtractorInterface
         }
     }
 
-    private function extractTypeSchema($type, ExtractionContext $extractionContext)
+    private function extractTypeSchema($type, ExtractionContextInterface $extractionContext)
     {
         $extractionContext->getSwagger()->extract($type, $schema = new Schema(), $extractionContext);
 
@@ -158,7 +158,7 @@ class JmsExtractor implements ExtractorInterface
                 return '';
             }
         } else {
-            $docBlock =  $factory->create($ref->getProperty($item->name)->getDocComment());
+            $docBlock = $factory->create($ref->getProperty($item->name)->getDocComment());
         }
 
         return $docBlock->getSummary();

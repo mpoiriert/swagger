@@ -58,7 +58,21 @@ abstract class ConstraintExtractor implements ConstraintExtractorInterface
             return false;
         }
 
-        return count($this->getPropertiesConstraints($source, $type, $extractionContext->getParameter('validation-groups'))) > 0;
+        $constraints = $this->getPropertiesConstraints(
+            $source,
+            $type,
+            $this->getValidationGroups($extractionContext)
+        );
+
+        return count($constraints);
+    }
+
+    private function getValidationGroups(ExtractionContextInterface $extractionContext)
+    {
+        $context = $extractionContext->getParameter('model-context', []);
+
+        return array_key_exists('validation-groups', $context) ? $context['validation-groups'] : null;
+
     }
 
     private function getPropertiesConstraints(ReflectionClass $reflectionClass, Schema $schema, array $groups = null)
@@ -68,7 +82,7 @@ abstract class ConstraintExtractor implements ConstraintExtractorInterface
             return array();
         }
 
-        if(is_null($groups)) {
+        if (is_null($groups)) {
             $groups = array(Constraint::DEFAULT_GROUP);
         }
 
@@ -88,17 +102,17 @@ abstract class ConstraintExtractor implements ConstraintExtractorInterface
                 /* @var $propertyMetadata */
 
                 $propertyConstraints = array();
-                foreach($groups as $group) {
+                foreach ($groups as $group) {
                     $propertyConstraints = array_merge(
                         $propertyConstraints,
                         $propertyMetadata->findConstraints($group)
                     );
                 }
 
-                $finalPropertyConstraints  = array();
+                $finalPropertyConstraints = array();
 
                 foreach ($propertyConstraints as $current) {
-                    if ( ! in_array($current, $finalPropertyConstraints)) {
+                    if (!in_array($current, $finalPropertyConstraints)) {
                         $finalPropertyConstraints[] = $current;
                     }
                 }
@@ -124,6 +138,8 @@ abstract class ConstraintExtractor implements ConstraintExtractorInterface
      * @param ReflectionClass $source
      * @param Schema $target
      * @param ExtractionContextInterface $extractionContext
+     *
+     * @throws ExtractionImpossibleException
      */
     public function extract($source, $target, ExtractionContextInterface $extractionContext)
     {
@@ -135,7 +151,7 @@ abstract class ConstraintExtractor implements ConstraintExtractorInterface
         $constraintExtractionContext->classSchema = $target;
         $constraintExtractionContext->context = "property";
 
-        $validationGroups = $extractionContext->getParameter('validation-groups');
+        $validationGroups = $this->getValidationGroups($extractionContext);
 
         $propertyConstraints = $this->getPropertiesConstraints($source, $target, $validationGroups);
 

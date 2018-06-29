@@ -180,6 +180,16 @@ class Builder
         $swagger = new Swagger($serializer = $this->getJmsSerializer());
 
         if ($this->registerDefaultsExtractor) {
+            if ($serializer instanceof Serializer) {
+                $metaDataFactory = $serializer->getMetadataFactory();
+                $swagger->registerExtractor(
+                    new JmsExtractor(
+                        $metaDataFactory,
+                        new SerializedNameAnnotationStrategy(new CamelCaseNamingStrategy())
+                    )
+                );
+            }
+
             foreach (glob(__DIR__ . '/Extraction/Extractor/Constraint/*.php') as $file) {
                 $extractName = pathinfo($file, PATHINFO_FILENAME);
                 $className = 'Draw\Swagger\Extraction\Extractor\Constraint\\' . $extractName;
@@ -206,16 +216,6 @@ class Builder
 
             foreach ($this->definitionAliases as $class => $alias) {
                 $typeExtractor->registerDefinitionAlias($class, $alias);
-            }
-
-            if ($serializer instanceof Serializer) {
-                $metaDataFactory = $serializer->getMetadataFactory();
-                $swagger->registerExtractor(
-                    new JmsExtractor(
-                        $metaDataFactory,
-                        new SerializedNameAnnotationStrategy(new CamelCaseNamingStrategy())
-                    )
-                );
             }
         }
 
