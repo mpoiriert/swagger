@@ -158,7 +158,11 @@ class JmsExtractor implements ExtractorInterface
                 return '';
             }
         } else {
-            $docBlock = $factory->create($ref->getProperty($item->name)->getDocComment());
+            if($docComment = $ref->getProperty($item->name)->getDocComment()) {
+                $docBlock = $factory->create($docComment);
+            } else {
+                return '';
+            }
         }
 
         return $docBlock->getSummary();
