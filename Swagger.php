@@ -78,7 +78,13 @@ class Swagger
         $validator = Validation::createValidatorBuilder()
             ->enableAnnotationMapping(new AnnotationReader())
             ->getValidator();
-        $result = $validator->validate($schema, array(Constraint::DEFAULT_GROUP), true, true);
+
+        //This is to support legacy system, that way we don't we are less strict for dependencies
+        if($validator instanceof \Symfony\Component\Validator\ValidatorInterface) {
+            $result = $validator->validate($schema, array(Constraint::DEFAULT_GROUP), true, true);
+        } else {
+            $result = $validator->validate($schema, null, array(Constraint::DEFAULT_GROUP));
+        }
 
         if (count($result)) {
             throw new \InvalidArgumentException("" . $result);
