@@ -22,15 +22,15 @@ class DoctrineInheritanceExtractor implements ExtractorInterface
 
     public function canExtract($source, $target, ExtractionContextInterface $extractionContext)
     {
-        if(!$source instanceof \ReflectionClass) {
+        if (!$source instanceof \ReflectionClass) {
             return false;
         }
 
-        if(!$target instanceof Schema) {
+        if (!$target instanceof Schema) {
             return false;
         }
 
-        if(!$this->managerRegistry->getManagerForClass($source->name)) {
+        if (!$this->managerRegistry->getManagerForClass($source->name)) {
             return false;
         }
 
@@ -52,27 +52,32 @@ class DoctrineInheritanceExtractor implements ExtractorInterface
 
 
         $metaData = $this->managerRegistry->getManagerForClass($source->name)->getClassMetadata($source->name);
-        if(!$metaData instanceof ClassMetadata) {
+        if (!$metaData instanceof ClassMetadata) {
             return;
         }
 
-        if($metaData->isInheritanceTypeNone()) {
+        if ($metaData->isInheritanceTypeNone()) {
             return;
         }
 
         $swagger = $extractionContext->getSwagger();
 
-        if($metaData->isRootEntity()) {
+        if ($metaData->isRootEntity()) {
             $target->discriminator = $metaData->discriminatorColumn['name'];
             $target->required[] = $target->discriminator;
-            foreach($metaData->discriminatorMap as $key => $class) {
+            foreach ($metaData->discriminatorMap as $key => $class) {
                 $schema = new Schema();
                 $swagger->extract($class, $schema, $extractionContext);
             }
+            $target->properties[$metaData->discriminatorColumn['name']] = $property = new Schema();
+            $property->type = 'string';
+            $property->description = 'The concrete class of the inheritance.';
+            $property->enum = array_keys($metaData->discriminatorMap);
         } else {
             $property = $target->properties[$metaData->discriminatorColumn['name']];
-            $property->description = 'Discriminator property';
+            $property->description = 'Discriminator property. Value will be ';
             $property->type = 'string';
+            $property->enum = [$metaData->discriminatorValue];
         }
     }
 }
