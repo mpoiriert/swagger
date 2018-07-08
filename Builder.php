@@ -2,7 +2,11 @@
 
 use Doctrine\Common\Annotations\AnnotationReader;
 use Doctrine\Common\Annotations\Reader;
+use Doctrine\Common\Persistence\ManagerRegistry;
+use Doctrine\Common\Persistence\Mapping\ClassMetadataFactory;
+use Doctrine\ORM\EntityManager;
 use Draw\Swagger\Extraction\Extractor\ConstraintExtractor;
+use Draw\Swagger\Extraction\Extractor\DoctrineInheritanceExtractor;
 use Draw\Swagger\Extraction\Extractor\JmsExtractor;
 use Draw\Swagger\Extraction\Extractor\PhpDocOperationExtractor;
 use Draw\Swagger\Extraction\Extractor\SwaggerParameterExtractor;
@@ -44,6 +48,11 @@ class Builder
      * @var Reader
      */
     private $annotationReader;
+
+    /**
+     * @var ManagerRegistry
+     */
+    private $managerRegistry;
 
     /**
      * @return MetadataFactoryInterface
@@ -147,6 +156,18 @@ class Builder
     }
 
     /**
+     * @param ManagerRegistry $managerRegistry
+     *
+     * @return $this
+     */
+    public function setManagerRegistry(ManagerRegistry $managerRegistry = null)
+    {
+        $this->managerRegistry = $managerRegistry;
+
+        return $this;
+    }
+
+    /**
      * @param SerializerInterface $jmsSerializer
      *
      * @return static
@@ -216,6 +237,10 @@ class Builder
 
             foreach ($this->definitionAliases as $class => $alias) {
                 $typeExtractor->registerDefinitionAlias($class, $alias);
+            }
+
+            if($this->managerRegistry) {
+                $swagger->registerExtractor(new DoctrineInheritanceExtractor($this->managerRegistry));
             }
         }
 

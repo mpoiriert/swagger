@@ -186,6 +186,17 @@ class Schema implements GroupSequenceProviderInterface
     public $additionalProperties;
 
     /**
+     * Adds support for polymorphism.
+     *
+     * The discriminator is the schema property name that is used to differentiate between other schema that inherit this schema.
+     * The property name used MUST be defined at this schema and it MUST be in the required property list.
+     * When used, the value MUST be the name of this schema or any schema that inherits it.
+     *
+     * @var string
+     */
+    public $discriminator;
+
+    /**
      * Relevant only for Schema "properties" definitions. Declares the property as "read only".
      * This means that it MAY be sent as part of a response but MUST NOT be sent as part of the request.
      * Properties marked as readOnly being true SHOULD NOT be in the required list of the defined schema.
