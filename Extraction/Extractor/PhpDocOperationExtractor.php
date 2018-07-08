@@ -12,6 +12,7 @@ use Draw\Swagger\Schema\Schema;
 use phpDocumentor\Reflection\DocBlock;
 use phpDocumentor\Reflection\DocBlockFactory;
 use phpDocumentor\Reflection\Types\Compound;
+use phpDocumentor\Reflection\Types\ContextFactory;
 use ReflectionMethod;
 
 class PhpDocOperationExtractor implements ExtractorInterface
@@ -39,9 +40,20 @@ class PhpDocOperationExtractor implements ExtractorInterface
         return true;
     }
 
-    private function createDocBlock($comment)
+    /**
+     * @param \Reflector $reflector
+     * @return DocBlock
+     */
+    private function createDocBlock(\Reflector $reflector)
     {
-        return DocBlockFactory::createInstance()->create($comment);
+        if(!method_exists($reflector, 'getDocComment')) {
+            throw new \InvalidArgumentException('$reflector parameter must have a [getDocComment] method.');
+        }
+
+        $contextFactory = new ContextFactory();
+        $context = $contextFactory->createFromReflector($reflector);
+
+        return DocBlockFactory::createInstance()->create($reflector->getDocComment(), $context);
     }
 
     /**
@@ -60,7 +72,7 @@ class PhpDocOperationExtractor implements ExtractorInterface
             throw new ExtractionImpossibleException();
         }
 
-        $docBlock = $this->createDocBlock($method->getDocComment());
+        $docBlock = $this->createDocBlock($method);
 
         if (!$operation->summary) {
             $operation->summary = (string)$docBlock->getSummary() ?: null;
@@ -110,7 +122,7 @@ class PhpDocOperationExtractor implements ExtractorInterface
                 $message = (string)$throwTag->getDescription();
             } else {
                 if (!$message) {
-                    $exceptionClassDocBlock = $this->createDocBlock($exceptionClass->getDocComment());
+                    $exceptionClassDocBlock = $this->createDocBlock($exceptionClass);
                     $message = $exceptionClassDocBlock->getSummary();
                 }
             }
