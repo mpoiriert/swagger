@@ -151,18 +151,18 @@ class JmsExtractor implements ExtractorInterface
         $factory = DocBlockFactory::createInstance();
 
         $ref = new \ReflectionClass($item->class);
-        if ($item instanceof VirtualPropertyMetadata) {
-            try {
+        try {
+            if ($item instanceof VirtualPropertyMetadata) {
                 $docBlock = $factory->create($ref->getMethod($item->getter)->getDocComment());
-            } catch (\ReflectionException $e) {
-                return '';
-            }
-        } else {
-            if($docComment = $ref->getProperty($item->name)->getDocComment()) {
-                $docBlock = $factory->create($docComment);
             } else {
-                return '';
+                if ($docComment = $ref->getProperty($item->name)->getDocComment()) {
+                    $docBlock = $factory->create($docComment);
+                } else {
+                    return '';
+                }
             }
+        } catch (\ReflectionException $e) {
+            return '';
         }
 
         return $docBlock->getSummary();
