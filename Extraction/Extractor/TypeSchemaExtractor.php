@@ -81,18 +81,13 @@ class TypeSchemaExtractor implements ExtractorInterface
         if ($target->type == "object") {
             $target->type = null;
             $reflectionClass = new \ReflectionClass($primitiveType['class']);
-            $name = $reflectionClass->getName();
             $rootSchema = $extractionContext->getRootSchema();
             $context = $extractionContext->getParameter('model-context', []);
 
-            if (array_key_exists($name, $this->definitionAliases)) {
-                $name = $this->definitionAliases[$name];
-            }
+            $definitionName = $this->getDefinitionName($reflectionClass->name);
 
-            if ($hash = $this->getHash($name, $context)) {
-                $definitionName = $name . '?' . $hash;
-            } else {
-                $definitionName = $name;
+            if ($hash = $this->getHash($definitionName, $context)) {
+                $definitionName .= '?' . $hash;
             }
 
             if (!$rootSchema->hasDefinition($definitionName)) {
@@ -112,6 +107,24 @@ class TypeSchemaExtractor implements ExtractorInterface
         if (isset($primitiveType['format'])) {
             $target->format = $primitiveType['format'];
         }
+    }
+
+    private function getDefinitionName($className)
+    {
+        foreach ($this->definitionAliases as $class => $alias) {
+            if (substr($class, -1) == '\\') {
+                if (strpos($className, $class) === 0) {
+                    return str_replace($class, $alias, $className);
+                }
+                continue;
+            }
+
+            if ($class == $className) {
+                return $alias;
+            }
+        }
+
+        return $className;
     }
 
     private function getHash($modelName, array $context = null)
