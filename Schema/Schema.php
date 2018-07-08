@@ -4,12 +4,13 @@ namespace Draw\Swagger\Schema;
 
 use JMS\Serializer\Annotation as JMS;
 use Symfony\Component\Validator\Constraints as Assert;
+use Symfony\Component\Validator\GroupSequenceProviderInterface;
 
 /**
  * @author Martin Poirier Theoret <mpoiriert@gmail.com>
  *
  */
-class Schema
+class Schema implements GroupSequenceProviderInterface
 {
     /**
      * @var string
@@ -150,7 +151,7 @@ class Schema
      *
      * @JMS\Type("string")
      *
-     * @Assert\NotBlank()
+     * @Assert\NotBlank(groups={"Type"})
      */
     public $type;
 
@@ -243,5 +244,14 @@ class Schema
         $this->default = Mixed::convert($this->default);
         $this->example = Mixed::convert($this->example);
         $this->enum = Mixed::convert($this->enum, true);
+    }
+
+    public function getGroupSequence()
+    {
+        $groups = ['Schema'];
+
+        if(!$this->ref && !$this->allOf) {
+            $groups[] = 'Type';
+        }
     }
 } 
