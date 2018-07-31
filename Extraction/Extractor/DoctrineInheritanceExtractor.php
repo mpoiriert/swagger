@@ -1,6 +1,5 @@
 <?php namespace Draw\Swagger\Extraction\Extractor;
 
-use App\Entity\InputScreen;
 use Doctrine\Common\Persistence\ManagerRegistry;
 use Doctrine\ORM\Mapping\ClassMetadata;
 use Draw\Swagger\Extraction\ExtractionContextInterface;
