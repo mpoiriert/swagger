@@ -73,10 +73,12 @@ class DoctrineInheritanceExtractor implements ExtractorInterface
             $property->description = 'The concrete class of the inheritance.';
             $property->enum = array_keys($metaData->discriminatorMap);
         } else {
-            $property = $target->properties[$metaData->discriminatorColumn['name']];
-            $property->description = 'Discriminator property. Value will be ';
-            $property->type = 'string';
-            $property->enum = [$metaData->discriminatorValue];
+            if(isset($target->properties[$metaData->discriminatorColumn['name']])) {
+                $property = $target->properties[$metaData->discriminatorColumn['name']];
+                $property->description = 'Discriminator property. Value will be ';
+                $property->type = 'string';
+                $property->enum = [$metaData->discriminatorValue];
+            }
         }
     }
 }
