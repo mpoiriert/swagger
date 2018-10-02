@@ -8,6 +8,7 @@ use Draw\Swagger\Extraction\ExtractionImpossibleException;
 use Draw\Swagger\Extraction\ExtractorInterface;
 use Draw\Swagger\Schema\Schema;
 use JMS\Serializer\Exclusion\GroupsExclusionStrategy;
+use JMS\Serializer\Exclusion\VersionExclusionStrategy;
 use JMS\Serializer\Metadata\VirtualPropertyMetadata;
 use JMS\Serializer\Naming\PropertyNamingStrategyInterface;
 use JMS\Serializer\SerializationContext;
@@ -19,6 +20,8 @@ use ReflectionClass;
 
 class JmsExtractor implements ExtractorInterface
 {
+    const CONTEXT_PARAMETER_ENABLE_VERSION_EXCLUSION_STRATEGY = 'jms-enable-version-exclusion-strategy';
+
     /**
      * @var MetadataFactoryInterface
      */
@@ -87,6 +90,16 @@ class JmsExtractor implements ExtractorInterface
 
         if (isset($modelContext['serializer-groups'])) {
             $exclusionStrategies[] = new GroupsExclusionStrategy($modelContext['serializer-groups']);
+        }
+
+        if($extractionContext->getParameter(self::CONTEXT_PARAMETER_ENABLE_VERSION_EXCLUSION_STRATEGY)) {
+            $info = $extractionContext->getRootSchema()->info;
+            if(!isset($info->version)) {
+                throw new \RuntimeException(
+                    'You must specify the [swagger.info.version] if you activate jms version exclusion strategy.'
+                );
+            }
+            $exclusionStrategies[] = new VersionExclusionStrategy($extractionContext->getRootSchema()->info->version);
         }
 
         foreach ($meta->propertyMetadata as $property => $item) {
