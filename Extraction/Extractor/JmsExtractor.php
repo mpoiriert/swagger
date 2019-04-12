@@ -107,7 +107,12 @@ class JmsExtractor implements ExtractorInterface
                 continue;
             }
 
-            if ($type = $this->getNestedTypeInArray($item)) {
+            if($this->isDynamicObject($item)) {
+                $propertySchema = new Schema();
+                $propertySchema->type = 'object';
+                $propertySchema->additionalProperties = new Schema();
+                $propertySchema->additionalProperties->type = $this->getNestedTypeInArray($item);
+            } elseif ($type = $this->getNestedTypeInArray($item)) {
                 $propertySchema = new Schema();
                 $propertySchema->type = 'array';
                 $propertySchema->items = $this->extractTypeSchema($type, $subContext);
@@ -153,6 +158,17 @@ class JmsExtractor implements ExtractorInterface
         }
 
         return null;
+    }
+
+    private function isDynamicObject(PropertyMetadata $item)
+    {
+        if (isset($item->type['name']) && in_array($item->type['name'], array('array', 'ArrayCollection'))) {
+            if (isset($item->type['params'][1]['name']) && $item->type['params'][1]['name'] == 'string') {
+                return true;
+            }
+        }
+
+        return false;
     }
 
     /**
