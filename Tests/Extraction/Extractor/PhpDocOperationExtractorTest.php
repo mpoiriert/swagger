@@ -1,14 +1,16 @@
-<?php
-
-namespace Draw\Swagger\Extraction\Extractor;
+<?php namespace Draw\Swagger\Tests\Extraction\Extractor;
 
 use Draw\Swagger\Extraction\ExtractionContext;
+use Draw\Swagger\Extraction\ExtractionContextInterface;
 use Draw\Swagger\Extraction\ExtractionImpossibleException;
+use Draw\Swagger\Extraction\Extractor\PhpDocOperationExtractor;
+use Draw\Swagger\Extraction\Extractor\TypeSchemaExtractor;
 use Draw\Swagger\Schema\Operation;
 use Draw\Swagger\Schema\PathItem;
 use Draw\Swagger\Swagger;
+use PHPUnit\Framework\TestCase;
 
-class PhpDocOperationExtractorTest extends \PHPUnit_Framework_TestCase
+class PhpDocOperationExtractorTest extends TestCase
 {
     public function provideTestCanExtract()
     {
@@ -27,12 +29,14 @@ class PhpDocOperationExtractorTest extends \PHPUnit_Framework_TestCase
      *
      * @param $source
      * @param $type
-     * @param $expected
+     * @param $canBeExtract
      */
     public function testCanExtract($source, $type, $canBeExtract)
     {
         $extractor = new PhpDocOperationExtractor();
-        $context = $this->getMock('Draw\Swagger\Extraction\ExtractionContextInterface');
+
+        /** @var ExtractionContextInterface $context */
+        $context = $this->getMockForAbstractClass(ExtractionContextInterface::class);
 
         $this->assertSame($canBeExtract, $extractor->canExtract($source, $type, $context));
 
@@ -84,7 +88,7 @@ class PhpDocOperationExtractorStubService
      * @param $string
      * @param array $array
      *
-     * @return \Draw\Swagger\Extraction\Extractor\PhpDocOperationExtractorStubService
+     * @return PhpDocOperationExtractorStubService
      *
      * @throws \Exception When problem occur
      * @throws \LengthException
@@ -92,5 +96,6 @@ class PhpDocOperationExtractorStubService
      */
     public function operation(PhpDocOperationExtractorStubService $service, $string, array $array)
     {
+        return $service;
     }
 }

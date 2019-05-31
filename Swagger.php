@@ -8,6 +8,7 @@ use Draw\Swagger\Extraction\ExtractionContextInterface;
 use Draw\Swagger\Extraction\ExtractorInterface;
 use Draw\Swagger\Extraction\Extractor\SwaggerSchemaExtractor;
 use JMS\Serializer\EventDispatcher\EventDispatcher;
+use JMS\Serializer\Handler\HandlerRegistry;
 use JMS\Serializer\SerializerBuilder;
 use JMS\Serializer\SerializerInterface;
 use Draw\Swagger\Schema\Swagger as Schema;
@@ -39,11 +40,18 @@ class Swagger
     public function __construct(SerializerInterface $serializer = null)
     {
         if (is_null($serializer)) {
-            $serializer = SerializerBuilder::create()->configureListeners(
-                function (EventDispatcher $dispatcher) {
-                    $dispatcher->addSubscriber(new JMSSerializerListener());
-                }
-            )->build();
+            $serializer = SerializerBuilder::create()
+                ->configureListeners(
+                    function (EventDispatcher $dispatcher) {
+                        $dispatcher->addSubscriber(new JMSSerializerListener());
+                    }
+                )
+                ->configureHandlers(
+                    function (HandlerRegistry $handlerRegistry) {
+                        $handlerRegistry->registerSubscribingHandler(new JMSSerializerHandler());
+                    }
+                )
+                ->build();
 
         }
         $this->serializer = $serializer;
@@ -80,7 +88,7 @@ class Swagger
             ->getValidator();
 
         //This is to support legacy system, that way we don't we are less strict for dependencies
-        if($validator instanceof \Symfony\Component\Validator\ValidatorInterface) {
+        if ($validator instanceof \Symfony\Component\Validator\ValidatorInterface) {
             $result = $validator->validate($schema, array(Constraint::DEFAULT_GROUP), true, true);
         } else {
             $result = $validator->validate($schema, null, array(Constraint::DEFAULT_GROUP));
@@ -92,9 +100,9 @@ class Swagger
     }
 
     /**
-     * @api
      * @param string $jsonSchema
      * @return mixed
+     * @api
      */
     public function extract($source, $type = null, ExtractionContextInterface $extractionContext = null)
     {

@@ -1,13 +1,12 @@
 {
   "swagger": "2.0",
   "definitions": {
-    "Draw.Swagger.Extraction.Extractor.JmsExtractorStubModel": {
+    "Draw.Swagger.Tests.Extraction.Extractor.JmsExtractorStubModel": {
       "properties": {
         "virtual": {
           "description": "The virtual property.",
-          "$ref": "#/definitions/Draw.Swagger.Extraction.Extractor.JmsExtractorStubModel",
-          "readOnly": true,
-          "type":"object"
+          "$ref": "#/definitions/Draw.Swagger.Tests.Extraction.Extractor.JmsExtractorStubModel",
+          "readOnly": true
         },
         "name": {
           "description": "The name",
@@ -22,8 +21,7 @@
           "description": "The array",
           "type": "array",
           "items": {
-            "$ref": "#/definitions/Draw.Swagger.Extraction.Extractor.JmsExtractorStubModel",
-            "type": "object"
+            "$ref": "#/definitions/Draw.Swagger.Tests.Extraction.Extractor.JmsExtractorStubModel"
           }
         }
       }

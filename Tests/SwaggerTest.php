@@ -1,11 +1,9 @@
-<?php
+<?php namespace Draw\Swagger\Tests;
 
-namespace Draw\Swagger;
+use Draw\Swagger\Swagger;
+use PHPUnit\Framework\TestCase;
 
-use JMS\Serializer\SerializerBuilder;
-use Symfony\Component\EventDispatcher\EventDispatcher;
-
-class SwaggerTest extends \PHPUnit_Framework_TestCase
+class SwaggerTest extends TestCase
 {
     public function provideTestExtractSwaggerSchema()
     {
@@ -26,7 +24,7 @@ class SwaggerTest extends \PHPUnit_Framework_TestCase
         $swagger = new Swagger();
 
         $schema = $swagger->extract(file_get_contents($file));
-        $this->assertInstanceOf('Draw\Swagger\Schema\Swagger', $schema);
+        $this->assertInstanceOf(\Draw\Swagger\Schema\Swagger::class, $schema);
 
         $this->assertJsonStringEqualsJsonString(file_get_contents($file), $swagger->dump($schema, false));
     }

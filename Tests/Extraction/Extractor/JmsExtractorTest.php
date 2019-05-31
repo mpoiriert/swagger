@@ -1,18 +1,26 @@
-<?php
-
-namespace Draw\Swagger\Extraction\Extractor;
+<?php namespace Draw\Swagger\Tests\Extraction\Extractor;
 
 use Draw\Swagger\Extraction\ExtractionContext;
+use Draw\Swagger\Extraction\ExtractionContextInterface;
+use Draw\Swagger\Extraction\ExtractionImpossibleException;
+use Draw\Swagger\Extraction\Extractor\JmsExtractor;
+use Draw\Swagger\Extraction\Extractor\TypeSchemaExtractor;
+use Draw\Swagger\Schema\Schema;
 use Draw\Swagger\Swagger;
 use JMS\Serializer\Annotation as JMS;
-use Draw\Swagger\Extraction\ExtractionImpossibleException;
-use Draw\Swagger\Schema\Schema;
 use JMS\Serializer\Naming\CamelCaseNamingStrategy;
 use JMS\Serializer\Naming\SerializedNameAnnotationStrategy;
 use JMS\Serializer\SerializerBuilder;
+use PHPUnit\Framework\TestCase;
+use ReflectionClass;
 
-class JmsExtractorTest extends \PHPUnit_Framework_TestCase
+class JmsExtractorTest extends TestCase
 {
+    /**
+     * @var JmsExtractor
+     */
+    private $jmsExtractor;
+
     public function provideTestCanExtract()
     {
         return array(
@@ -23,30 +31,43 @@ class JmsExtractorTest extends \PHPUnit_Framework_TestCase
         );
     }
 
+    public function setUp()
+    {
+        $serializer = SerializerBuilder::create()->build();
+
+        //This is to be compatible for version 1,2,3 of jms since the method getMetadataFactory doesn't exists anymore
+        //When using the library you should inject the factory on your initializing flow
+        $property = new \ReflectionProperty(get_class($serializer), 'factory');
+        $property->setAccessible(true);
+        $metadataFactory = $property->getValue($serializer);
+
+        $this->jmsExtractor = new JmsExtractor(
+            $metadataFactory,
+            new SerializedNameAnnotationStrategy(new CamelCaseNamingStrategy())
+        );
+    }
+
     /**
      * @dataProvider provideTestCanExtract
      *
      * @param $source
      * @param $type
-     * @param $expected
+     * @param $canBeExtract
      */
     public function testCanExtract($source, $type, $canBeExtract)
     {
         if (!is_null($source)) {
             $source = new \ReflectionClass($source);
         }
-        $extractor = new JmsExtractor(
-            SerializerBuilder::create()->build()->getMetadataFactory(),
-            new SerializedNameAnnotationStrategy(new CamelCaseNamingStrategy())
-        );
 
-        $context = $this->getMock('Draw\Swagger\Extraction\ExtractionContextInterface');
+        /** @var ExtractionContextInterface $context */
+        $context = $this->getMockForAbstractClass(ExtractionContextInterface::class);
 
-        $this->assertSame($canBeExtract, $extractor->canExtract($source, $type, $context));
+        $this->assertSame($canBeExtract, $this->jmsExtractor->canExtract($source, $type, $context));
 
         if (!$canBeExtract) {
             try {
-                $extractor->extract($source, $type, $context);
+                $this->jmsExtractor->extract($source, $type, $context);
                 $this->fail('should throw a exception of type [Draw\Swagger\Extraction\ExtractionImpossibleException]');
             } catch (ExtractionImpossibleException $e) {
                 $this->assertTrue(true);
@@ -56,22 +77,18 @@ class JmsExtractorTest extends \PHPUnit_Framework_TestCase
 
     public function testExtract()
     {
-        $extractor = new JmsExtractor(
-            SerializerBuilder::create()->build()->getMetadataFactory(),
-            new SerializedNameAnnotationStrategy(new CamelCaseNamingStrategy())
-        );
-        $reflectionClass = new \ReflectionClass(__NAMESPACE__ . '\JmsExtractorStubModel');
+        $reflectionClass = new ReflectionClass(__NAMESPACE__ . '\JmsExtractorStubModel');
 
         $context = $this->getExtractionContext();
 
         //Need to be there to validate that JMS extract it's type properly
         $context->getSwagger()->registerExtractor(new TypeSchemaExtractor());
-        $context->setParameter('jms-groups', array('test'));
+        $context->setParameter('model-context', ['serializer-groups' => ['test']]);
         $schema = $context->getRootSchema();
 
         $schema->addDefinition($reflectionClass->getName(), $modelSchema = new Schema());
 
-        $extractor->extract($reflectionClass, $modelSchema, $context);
+        $this->jmsExtractor->extract($reflectionClass, $modelSchema, $context);
 
         $jsonSchema = $context->getSwagger()->dump($context->getRootSchema(), false);
 
@@ -116,7 +133,7 @@ class JmsExtractorStubModel
      * The array
      *
      * @var array
-     * @JMS\Type("array<Draw\Swagger\Extraction\Extractor\JmsExtractorStubModel>")
+     * @JMS\Type("array<Draw\Swagger\Tests\Extraction\Extractor\JmsExtractorStubModel>")
      * @JMS\Groups("test")
      */
     public $array;
@@ -125,7 +142,7 @@ class JmsExtractorStubModel
      * The array
      *
      * @var array
-     * @JMS\Type("array<Draw\Swagger\Extraction\Extractor\JmsExtractorStubModel>")
+     * @JMS\Type("array<Draw\Swagger\Tests\Extraction\Extractor\JmsExtractorStubModel>")
      */
     public $notThereByGroup;
 
@@ -140,7 +157,7 @@ class JmsExtractorStubModel
      * The virtual property.
      *
      * @JMS\VirtualProperty()
-     * @JMS\Type("Draw\Swagger\Extraction\Extractor\JmsExtractorStubModel")
+     * @JMS\Type("Draw\Swagger\Tests\Extraction\Extractor\JmsExtractorStubModel")
      * @JMS\Groups("test")
      */
     public function getVirtual()

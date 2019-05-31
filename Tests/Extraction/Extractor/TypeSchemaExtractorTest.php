@@ -1,19 +1,14 @@
-<?php
-/**
- * Created by PhpStorm.
- * User: martin
- * Date: 30/09/17
- * Time: 10:31 PM
- */
-
-namespace Draw\Swagger\Extraction\Extractor;
+<?php namespace Draw\Swagger\Tests\Extraction\Extractor;
 
 use Draw\Swagger\Extraction\ExtractionContext;
+use Draw\Swagger\Extraction\ExtractionContextInterface;
 use Draw\Swagger\Extraction\ExtractionImpossibleException;
+use Draw\Swagger\Extraction\Extractor\TypeSchemaExtractor;
 use Draw\Swagger\Schema\Schema;
 use Draw\Swagger\Swagger;
+use PHPUnit\Framework\TestCase;
 
-class TypeSchemaExtractorTest extends \PHPUnit_Framework_TestCase
+class TypeSchemaExtractorTest extends TestCase
 {
     public function provideTestCanExtract()
     {
@@ -31,13 +26,14 @@ class TypeSchemaExtractorTest extends \PHPUnit_Framework_TestCase
      *
      * @param $source
      * @param $type
-     * @param $expected
+     * @param $canBeExtract
      */
     public function testCanExtract($source, $type, $canBeExtract)
     {
         $extractor = new TypeSchemaExtractor();
 
-        $context = $this->getMock('Draw\Swagger\Extraction\ExtractionContextInterface');
+        /** @var ExtractionContextInterface $context */
+        $context = $this->getMockForAbstractClass(ExtractionContextInterface::class);
 
         $this->assertSame($canBeExtract, $extractor->canExtract($source, $type, $context));
 

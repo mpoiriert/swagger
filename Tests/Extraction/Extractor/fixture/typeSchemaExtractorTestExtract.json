@@ -11,10 +11,9 @@
       }
     },
     "object": {
-      "$ref": "#/definitions/Draw.Swagger.Extraction.Extractor.TypeExtractorStubModel",
-      "type": "object"
+      "$ref": "#/definitions/Draw.Swagger.Tests.Extraction.Extractor.TypeExtractorStubModel"
     },
-    "Draw.Swagger.Extraction.Extractor.TypeExtractorStubModel": {
+    "Draw.Swagger.Tests.Extraction.Extractor.TypeExtractorStubModel": {
       "type": "object"
     }
   }

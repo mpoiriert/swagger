@@ -7,8 +7,7 @@
         "responses": {
           "200": {
             "schema": {
-              "$ref": "#/definitions/Draw.Swagger.Extraction.Extractor.PhpDocOperationExtractorStubService",
-              "type": "object"
+              "$ref": "#/definitions/Draw.Swagger.Tests.Extraction.Extractor.PhpDocOperationExtractorStubService"
             }
           },
           "500": {
@@ -25,7 +24,7 @@
     }
   },
   "definitions": {
-    "Draw.Swagger.Extraction.Extractor.PhpDocOperationExtractorStubService": {
+    "Draw.Swagger.Tests.Extraction.Extractor.PhpDocOperationExtractorStubService": {
       "type": "object"
     }
   }

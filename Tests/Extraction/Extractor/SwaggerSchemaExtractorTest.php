@@ -1,12 +1,13 @@
-<?php
+<?php namespace Draw\Swagger\Tests\Extraction\Extractor;
 
-namespace Draw\Swagger\Extraction\Extractor;
-
+use Draw\Swagger\Extraction\ExtractionContextInterface;
 use Draw\Swagger\Extraction\ExtractionImpossibleException;
+use Draw\Swagger\Extraction\Extractor\SwaggerSchemaExtractor;
 use Draw\Swagger\Schema\Swagger;
 use JMS\Serializer\SerializerBuilder;
+use PHPUnit\Framework\TestCase;
 
-class SwaggerSchemaExtractorTest extends \PHPUnit_Framework_TestCase
+class SwaggerSchemaExtractorTest extends TestCase
 {
     public function provideTestCanExtract()
     {
@@ -30,7 +31,9 @@ class SwaggerSchemaExtractorTest extends \PHPUnit_Framework_TestCase
     public function testCanExtract($source, $type, $expected)
     {
         $extractor = new SwaggerSchemaExtractor(SerializerBuilder::create()->build());
-        $context = $this->getMock('Draw\Swagger\Extraction\ExtractionContextInterface');
+
+        /** @var ExtractionContextInterface $context */
+        $context = $this->getMockForAbstractClass(ExtractionContextInterface::class);
 
         $this->assertSame($expected, $extractor->canExtract($source, $type, $context));
 

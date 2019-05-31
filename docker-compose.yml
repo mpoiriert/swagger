@@ -1,0 +1,9 @@
+version: '3'
+services:
+    php:
+        build: .docker/php
+        container_name: php
+        volumes:
+          - .:/home/wwwroot
+        ports:
+          - "22:22"

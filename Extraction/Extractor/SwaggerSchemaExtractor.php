@@ -6,16 +6,16 @@ use Draw\Swagger\Extraction\ExtractionContextInterface;
 use Draw\Swagger\Extraction\ExtractionImpossibleException;
 use Draw\Swagger\Extraction\ExtractorInterface;
 use Draw\Swagger\Schema\Swagger;
-use JMS\Serializer\Serializer;
+use JMS\Serializer\SerializerInterface;
 
 class SwaggerSchemaExtractor implements ExtractorInterface
 {
     /**
-     * @var Serializer
+     * @var SerializerInterface
      */
     private $serializer;
 
-    public function __construct(Serializer $serializer)
+    public function __construct(SerializerInterface $serializer)
     {
         $this->serializer = $serializer;
     }
