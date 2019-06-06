@@ -92,9 +92,9 @@ class JmsExtractor implements ExtractorInterface
             $exclusionStrategies[] = new GroupsExclusionStrategy($modelContext['serializer-groups']);
         }
 
-        if($extractionContext->getParameter(self::CONTEXT_PARAMETER_ENABLE_VERSION_EXCLUSION_STRATEGY)) {
+        if ($extractionContext->getParameter(self::CONTEXT_PARAMETER_ENABLE_VERSION_EXCLUSION_STRATEGY)) {
             $info = $extractionContext->getRootSchema()->info;
-            if(!isset($info->version)) {
+            if (!isset($info->version)) {
                 throw new \RuntimeException(
                     'You must specify the [swagger.info.version] if you activate jms version exclusion strategy.'
                 );
@@ -103,11 +103,11 @@ class JmsExtractor implements ExtractorInterface
         }
 
         foreach ($meta->propertyMetadata as $property => $item) {
-            if ($this->shouldSkipProperty($exclusionStrategies, $item)) {
+            if ($this->shouldSkipProperty($exclusionStrategies, $item, $subContext)) {
                 continue;
             }
 
-            if($this->isDynamicObject($item)) {
+            if ($this->isDynamicObject($item)) {
                 $propertySchema = new Schema();
                 $propertySchema->type = 'object';
                 $propertySchema->additionalProperties = new Schema();
@@ -115,9 +115,9 @@ class JmsExtractor implements ExtractorInterface
             } elseif ($type = $this->getNestedTypeInArray($item)) {
                 $propertySchema = new Schema();
                 $propertySchema->type = 'array';
-                $propertySchema->items = $this->extractTypeSchema($type, $subContext);
+                $propertySchema->items = $this->extractTypeSchema($type, $subContext, $item);
             } else {
-                $propertySchema = $this->extractTypeSchema($item->type['name'], $subContext);
+                $propertySchema = $this->extractTypeSchema($item->type['name'], $subContext, $item);
             }
 
             if ($item->readOnly) {
@@ -130,8 +130,15 @@ class JmsExtractor implements ExtractorInterface
         }
     }
 
-    private function extractTypeSchema($type, ExtractionContextInterface $extractionContext)
-    {
+    private function extractTypeSchema(
+        $type,
+        ExtractionContextInterface $extractionContext,
+        PropertyMetadata $propertyMetadata
+    ) {
+        $extractionContext = $extractionContext->createSubContext();
+        $path = $extractionContext->getParameter('jms-path', []);
+        $path[] = $propertyMetadata;
+        $extractionContext->setParameter('jms-path', $path);
         $extractionContext->getSwagger()->extract($type, $schema = new Schema(), $extractionContext);
 
         return $schema;
@@ -141,7 +148,7 @@ class JmsExtractor implements ExtractorInterface
      * Check the various ways JMS describes values in arrays, and
      * get the value type in the array
      *
-     * @param  PropertyMetadata $item
+     * @param PropertyMetadata $item
      * @return string|null
      */
     private function getNestedTypeInArray(PropertyMetadata $item)
@@ -202,10 +209,19 @@ class JmsExtractor implements ExtractorInterface
      * @param $item
      * @return bool
      */
-    private function shouldSkipProperty($exclusionStrategies, $item)
-    {
+    private function shouldSkipProperty(
+        $exclusionStrategies,
+        $item,
+        ExtractionContextInterface $extractionContext
+    ) {
+        $serializationContext = SerializationContext::create();
+
+        foreach($extractionContext->getParameter('jms-path', []) as $metadata) {
+            $serializationContext->getMetadataStack()->push($metadata);
+        }
+
         foreach ($exclusionStrategies as $strategy) {
-            if (true === $strategy->shouldSkipProperty($item, SerializationContext::create())) {
+            if (true === $strategy->shouldSkipProperty($item, $serializationContext)) {
                 return true;
             }
         }
