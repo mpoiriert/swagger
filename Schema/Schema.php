@@ -8,7 +8,6 @@ use Symfony\Component\Validator\GroupSequenceProviderInterface;
 
 /**
  * @author Martin Poirier Theoret <mpoiriert@gmail.com>
- *
  */
 class Schema implements GroupSequenceProviderInterface
 {

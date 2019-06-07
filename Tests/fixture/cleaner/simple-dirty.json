@@ -1,0 +1,79 @@
+{
+    "swagger": "2.0",
+    "info": {
+        "title": "Documentation",
+        "description": "",
+        "termsOfService": "N\\A",
+        "version": "1.0"
+    },
+    "paths": {
+        "/users/{id}": {
+            "get": {
+                "tags": [
+                    "Users"
+                ],
+                "operationId": "users_get",
+                "parameters": [
+                    {
+                        "type": "integer",
+                        "name": "id",
+                        "in": "path"
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "schema": {
+                            "$ref": "#/definitions/User"
+                        }
+                    }
+                }
+            }
+        },
+        "/users/me": {
+            "get": {
+                "tags": [
+                    "Users"
+                ],
+                "operationId": "users_me",
+                "parameters": [],
+                "responses": {
+                    "200": {
+                        "schema": {
+                            "$ref": "#/definitions/User?1"
+                        }
+                    }
+                }
+            }
+        }
+    },
+    "definitions": {
+        "User": {
+            "type": "object",
+            "properties": {
+                "id": {
+                    "description": "Id of the user",
+                    "type": "integer",
+                    "readOnly": true
+                },
+                "email": {
+                    "description": "Email of the user",
+                    "type": "string"
+                }
+            }
+        },
+        "User?1": {
+            "type": "object",
+            "properties": {
+                "id": {
+                    "description": "Id of the user",
+                    "type": "integer",
+                    "readOnly": true
+                },
+                "email": {
+                    "description": "Email of the user",
+                    "type": "string"
+                }
+            }
+        }
+    }
+}

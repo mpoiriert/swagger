@@ -37,7 +37,19 @@ class Swagger
      */
     private $sortedExtractors;
 
-    public function __construct(SerializerInterface $serializer = null)
+    /**
+     * Whether or not we want to clean the schema on dump
+     *
+     * @var bool
+     */
+    private $cleanOnDump = false;
+
+    /**
+     * @var SchemaCleaner
+     */
+    private $schemaCleaner;
+
+    public function __construct(SerializerInterface $serializer = null, SchemaCleaner $schemaCleaner = null)
     {
         if (is_null($serializer)) {
             $serializer = SerializerBuilder::create()
@@ -54,7 +66,10 @@ class Swagger
                 ->build();
 
         }
+
         $this->serializer = $serializer;
+
+        $this->schemaCleaner = $schemaCleaner ?: new SchemaCleaner();
 
         $this->registerExtractor(new SwaggerSchemaExtractor($this->serializer), -1, 'swagger');
     }
@@ -66,11 +81,32 @@ class Swagger
     }
 
     /**
+     * @return bool
+     */
+    public function getCleanOnDump()
+    {
+        return $this->cleanOnDump;
+    }
+
+    /**
+     * @param bool $cleanOnDump
+     */
+    public function setCleanOnDump($cleanOnDump)
+    {
+        $this->cleanOnDump = $cleanOnDump;
+    }
+
+    /**
      * @param Schema $schema
+     * @param boolean $validate
      * @return string
      */
     public function dump(Schema $schema, $validate = true)
     {
+        if($this->cleanOnDump) {
+            $schema = $this->schemaCleaner->clean($schema);
+        }
+
         if ($validate) {
             $this->validate($schema);
         }
@@ -100,7 +136,8 @@ class Swagger
     }
 
     /**
-     * @param string $jsonSchema
+     * @param mixed $source
+     * @param mixed $type
      * @return mixed
      * @api
      */
