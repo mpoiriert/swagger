@@ -21,7 +21,8 @@ class SchemaCleanerTest extends TestCase
         return [
             'simple' => ['simple'],
             'difference' => ['difference'],
-            'deep-reference' => ['deep-reference']
+            'deep-reference' => ['deep-reference'],
+            'not-needed-model' => ['not-needed-model']
         ];
     }
 

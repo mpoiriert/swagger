@@ -55,7 +55,40 @@ class SchemaCleaner
             }
         } while (count($replaceSchemas));
 
+        do {
+            $suppressionOccurred = false;
+            foreach ($swaggerSchema->definitions as $name => $definitionSchema) {
+                if (!$this->hasSchemaReference($swaggerSchema, '#/definitions/' . $name)) {
+                    unset($swaggerSchema->definitions[$name]);
+                    $suppressionOccurred = true;
+                }
+            }
+        } while ($suppressionOccurred);
+
         return $swaggerSchema;
+    }
+
+    private function hasSchemaReference($data, $reference)
+    {
+        if(!is_object($data) && !is_array($data)) {
+            return false;
+        }
+
+        if(is_object($data)) {
+            if($data instanceof Schema || $data instanceof PathItem) {
+                if($data->ref == $reference) {
+                    return true;
+                }
+            }
+        }
+
+        foreach ($data as &$value) {
+            if ($this->hasSchemaReference($value, $reference)) {
+                return true;
+            }
+        }
+
+        return false;
     }
 
     private function replaceSchemaReference($data, $definitionToReplace, $definitionToReplaceWith)
