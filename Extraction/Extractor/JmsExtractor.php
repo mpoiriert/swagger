@@ -1,22 +1,24 @@
-<?php
+<?php namespace Draw\Swagger\Extraction\Extractor;
 
-namespace Draw\Swagger\Extraction\Extractor;
-
-use Draw\Swagger\Extraction\ExtractionContext;
 use Draw\Swagger\Extraction\ExtractionContextInterface;
 use Draw\Swagger\Extraction\ExtractionImpossibleException;
+use Draw\Swagger\Extraction\Extractor\JmsSerializer\ArrayTypeToSchemaHandler;
+use Draw\Swagger\Extraction\Extractor\JmsSerializer\DynamicObjectTypeToSchemaHandler;
+use Draw\Swagger\Extraction\Extractor\JmsSerializer\TypeToSchemaHandlerInterface;
 use Draw\Swagger\Extraction\ExtractorInterface;
 use Draw\Swagger\Schema\Schema;
+use JMS\Serializer\Exclusion\ExclusionStrategyInterface;
 use JMS\Serializer\Exclusion\GroupsExclusionStrategy;
 use JMS\Serializer\Exclusion\VersionExclusionStrategy;
 use JMS\Serializer\Metadata\VirtualPropertyMetadata;
 use JMS\Serializer\Naming\PropertyNamingStrategyInterface;
 use JMS\Serializer\SerializationContext;
 use Metadata\MetadataFactoryInterface;
-use Metadata\PropertyMetadata;
-use phpDocumentor\Reflection\DocBlock;
+use JMS\Serializer\Metadata\PropertyMetadata;
 use phpDocumentor\Reflection\DocBlockFactory;
 use ReflectionClass;
+use ReflectionException;
+use RuntimeException;
 
 class JmsExtractor implements ExtractorInterface
 {
@@ -33,14 +35,24 @@ class JmsExtractor implements ExtractorInterface
     private $namingStrategy;
 
     /**
-     * Constructor, requires JMS Metadata factory
+     * @var array|TypeToSchemaHandlerInterface[]
      */
+    private $typeToSchemaHandlers = [];
+
     public function __construct(
         MetadataFactoryInterface $factory,
         PropertyNamingStrategyInterface $namingStrategy
     ) {
         $this->factory = $factory;
         $this->namingStrategy = $namingStrategy;
+
+        $this->registerTypeToSchemaHandler(new DynamicObjectTypeToSchemaHandler());
+        $this->registerTypeToSchemaHandler(new ArrayTypeToSchemaHandler());
+    }
+
+    public function registerTypeToSchemaHandler(TypeToSchemaHandlerInterface $typeToSchemaHandler)
+    {
+        $this->typeToSchemaHandlers[] = $typeToSchemaHandler;
     }
 
     /**
@@ -95,28 +107,27 @@ class JmsExtractor implements ExtractorInterface
         if ($extractionContext->getParameter(self::CONTEXT_PARAMETER_ENABLE_VERSION_EXCLUSION_STRATEGY)) {
             $info = $extractionContext->getRootSchema()->info;
             if (!isset($info->version)) {
-                throw new \RuntimeException(
+                throw new RuntimeException(
                     'You must specify the [swagger.info.version] if you activate jms version exclusion strategy.'
                 );
             }
             $exclusionStrategies[] = new VersionExclusionStrategy($extractionContext->getRootSchema()->info->version);
         }
 
-        foreach ($meta->propertyMetadata as $property => $item) {
+        /** @var PropertyMetadata $item */
+        foreach ($meta->propertyMetadata as $item) {
             if ($this->shouldSkipProperty($exclusionStrategies, $item, $subContext)) {
                 continue;
             }
 
-            if ($this->isDynamicObject($item)) {
-                $propertySchema = new Schema();
-                $propertySchema->type = 'object';
-                $propertySchema->additionalProperties = new Schema();
-                $propertySchema->additionalProperties->type = $this->getNestedTypeInArray($item);
-            } elseif ($type = $this->getNestedTypeInArray($item)) {
-                $propertySchema = new Schema();
-                $propertySchema->type = 'array';
-                $propertySchema->items = $this->extractTypeSchema($type, $subContext, $item);
-            } else {
+            $propertySchema = null;
+            foreach ($this->typeToSchemaHandlers as $typeToSchemaHandler) {
+                if ($propertySchema = $typeToSchemaHandler->extractSchemaFromType($item, $subContext)) {
+                    break;
+                }
+            }
+
+            if (!$propertySchema) {
                 $propertySchema = $this->extractTypeSchema($item->type['name'], $subContext, $item);
             }
 
@@ -130,7 +141,7 @@ class JmsExtractor implements ExtractorInterface
         }
     }
 
-    private function extractTypeSchema(
+    public static function extractTypeSchema(
         $type,
         ExtractionContextInterface $extractionContext,
         PropertyMetadata $propertyMetadata
@@ -145,40 +156,6 @@ class JmsExtractor implements ExtractorInterface
     }
 
     /**
-     * Check the various ways JMS describes values in arrays, and
-     * get the value type in the array
-     *
-     * @param PropertyMetadata $item
-     * @return string|null
-     */
-    private function getNestedTypeInArray(PropertyMetadata $item)
-    {
-        if (isset($item->type['name']) && in_array($item->type['name'], array('array', 'ArrayCollection'))) {
-            if (isset($item->type['params'][1]['name'])) {
-                // E.g. array<string, MyNamespaceMyObject>
-                return $item->type['params'][1]['name'];
-            }
-            if (isset($item->type['params'][0]['name'])) {
-                // E.g. array<MyNamespaceMyObject>
-                return $item->type['params'][0]['name'];
-            }
-        }
-
-        return null;
-    }
-
-    private function isDynamicObject(PropertyMetadata $item)
-    {
-        if (isset($item->type['name']) && in_array($item->type['name'], array('array', 'ArrayCollection'))) {
-            if (isset($item->type['params'][1]['name']) && $item->type['params'][1]['name'] == 'string') {
-                return true;
-            }
-        }
-
-        return false;
-    }
-
-    /**
      * @param PropertyMetadata $item
      * @return string
      */
@@ -186,7 +163,7 @@ class JmsExtractor implements ExtractorInterface
     {
         $factory = DocBlockFactory::createInstance();
 
-        $ref = new \ReflectionClass($item->class);
+        $ref = new ReflectionClass($item->class);
         try {
             if ($item instanceof VirtualPropertyMetadata) {
                 $docBlock = $factory->create($ref->getMethod($item->getter)->getDocComment());
@@ -197,7 +174,7 @@ class JmsExtractor implements ExtractorInterface
                     return '';
                 }
             }
-        } catch (\ReflectionException $e) {
+        } catch (ReflectionException $e) {
             return '';
         }
 
@@ -205,18 +182,19 @@ class JmsExtractor implements ExtractorInterface
     }
 
     /**
-     * @param \JMS\Serializer\Exclusion\ExclusionStrategyInterface[] $exclusionStrategies
-     * @param $item
+     * @param ExclusionStrategyInterface[] $exclusionStrategies
+     * @param PropertyMetadata $item
+     * @param ExtractionContextInterface $extractionContext
      * @return bool
      */
     private function shouldSkipProperty(
         $exclusionStrategies,
-        $item,
+        PropertyMetadata $item,
         ExtractionContextInterface $extractionContext
     ) {
         $serializationContext = SerializationContext::create();
 
-        foreach($extractionContext->getParameter('jms-path', []) as $metadata) {
+        foreach ($extractionContext->getParameter('jms-path', []) as $metadata) {
             $serializationContext->getMetadataStack()->push($metadata);
         }
 
