@@ -65,6 +65,30 @@ class SchemaCleaner
             }
         } while ($suppressionOccurred);
 
+        // Rename aliases in case of skip to be cleaner (e.g.: [User?3, User?6] => [User, User?1])
+        $definitionsToRename = [];
+        foreach($swaggerSchema->definitions as $name => $definitionSchema) {
+            $definitionsToRename[parse_url($name)['path']][] = $name;
+        }
+
+        foreach ($definitionsToRename as $objectName => $names) {
+            array_walk($names,
+                function ($name, $index) use ($objectName, $swaggerSchema) {
+                    $replaceWith = $objectName . ($index ? '?' . $index : '');
+                    // If the replace name is the same as the current index we do not do anything
+                    if($replaceWith == $name) {
+                        return;
+                    }
+                    $swaggerSchema->definitions[$replaceWith] = $swaggerSchema->definitions[$name];
+                    unset($swaggerSchema->definitions[$name]);
+                    $this->replaceSchemaReference(
+                        $swaggerSchema,
+                        '#/definitions/' . $name,
+                        '#/definitions/' . $replaceWith
+                    );
+                });
+        }
+
         return $swaggerSchema;
     }
 

@@ -22,7 +22,8 @@ class SchemaCleanerTest extends TestCase
             'simple' => ['simple'],
             'difference' => ['difference'],
             'deep-reference' => ['deep-reference'],
-            'not-needed-model' => ['not-needed-model']
+            'not-needed-model' => ['not-needed-model'],
+            'definition-index' => ['definition-index']
         ];
     }
 
