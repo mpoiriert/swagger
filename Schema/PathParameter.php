@@ -8,5 +8,8 @@ namespace Draw\Swagger\Schema;
  */
 class PathParameter extends Parameter
 {
-
+    public function __construct()
+    {
+        $this->required = true;
+    }
 }
