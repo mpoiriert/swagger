@@ -14,8 +14,10 @@ class Response
      * @var string
      *
      * @JMS\Type("string")
+     *
+     * @Assert\NotNull()
      */
-    public $description;
+    public $description = '';
 
     /**
      * @var Schema

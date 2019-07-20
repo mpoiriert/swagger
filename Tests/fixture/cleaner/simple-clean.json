@@ -22,6 +22,7 @@
                 ],
                 "responses": {
                     "200": {
+                        "description": "",
                         "schema": {
                             "$ref": "#/definitions/User"
                         }
@@ -37,6 +38,7 @@
                 "operationId": "users_me",
                 "responses": {
                     "200": {
+                        "description": "",
                         "schema": {
                             "$ref": "#/definitions/User"
                         }

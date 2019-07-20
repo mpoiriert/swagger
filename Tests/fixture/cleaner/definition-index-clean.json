@@ -22,11 +22,13 @@
                 ],
                 "responses": {
                     "200": {
+                        "description": "",
                         "schema": {
                             "$ref": "#/definitions/User"
                         }
                     },
                     "201": {
+                        "description": "",
                         "schema": {
                             "$ref": "#/definitions/User?1"
                         }

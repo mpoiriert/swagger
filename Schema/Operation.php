@@ -111,6 +111,7 @@ class Operation
      *
      * @Assert\NotNull()
      * @Assert\Valid()
+     * @Assert\Count(min=1, minMessage="Operation must have at leas one response.")
      *
      * @JMS\Type("array<string,Draw\Swagger\Schema\Response>")
      */
