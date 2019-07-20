@@ -8,6 +8,8 @@ use Symfony\Component\Validator\GroupSequenceProviderInterface;
 
 /**
  * @author Martin Poirier Theoret <mpoiriert@gmail.com>
+ *
+ * @Assert\GroupSequenceProvider()
  */
 class Schema implements GroupSequenceProviderInterface
 {
@@ -150,7 +152,8 @@ class Schema implements GroupSequenceProviderInterface
      *
      * @JMS\Type("string")
      *
-     * @Assert\NotBlank(groups={"Type"})
+     * @Assert\NotBlank(groups={"Type"}, message="You must define a [type] or [ref|allOf]")
+     * @Assert\IsNull(groups={"Ref"}, message="You cannot define a [type] when [ref|allOf] is defined.")
      */
     public $type;
 
@@ -262,6 +265,10 @@ class Schema implements GroupSequenceProviderInterface
 
         if(!$this->ref && !$this->allOf) {
             $groups[] = 'Type';
+        } else {
+            $groups[] = 'Ref';
         }
+
+        return $groups;
     }
 } 
