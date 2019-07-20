@@ -1,0 +1,16 @@
+{
+  "swagger": "2.0",
+  "paths": {
+    "/service": {
+      "get": {
+        "parameters": [],
+        "responses": {
+          "204": {
+            "description": "Empty response mean success."
+          }
+        }
+      }
+    }
+  },
+  "definitions": {}
+}

@@ -94,15 +94,29 @@ class PhpDocOperationExtractor implements ExtractorInterface
             }
 
             foreach ($types as $type) {
-                $response = new Response();
-                $response->schema = $responseSchema = new Schema();
-                $response->description = (string)$returnTag->getDescription() ?: null;
-                $operation->responses[200] = $response;
+                if($type == 'void' && count($types) > 1) {
+                    throw new \RuntimeException('Operation returning [void] cannot return anything else.');
+                }
 
-                $subContext = $extractionContext->createSubContext();
-                $subContext->setParameter('controller-reflection-method', $method);
-                $extractionContext->getSwagger()->extract($type, $responseSchema, $subContext);
+                $response = new Response();
+                $response->description = (string)$returnTag->getDescription() ?: null;
+                if($type != 'void') {
+                    $response->schema = $responseSchema = new Schema();
+                    $subContext = $extractionContext->createSubContext();
+                    $subContext->setParameter('controller-reflection-method', $method);
+                    $extractionContext->getSwagger()->extract($type, $responseSchema, $subContext);
+                    $statusCode = $subContext->getParameter('response-status-code', 200);
+                } else {
+                    $statusCode = 204;
+                }
+
+                $operation->responses[$statusCode] = $response;
             }
+        }
+
+        if(!$operation->responses) {
+            $operation->responses[204] = $response = new Response();
+            $response->description = 'Empty response mean success.';
         }
 
         if ($docBlock->getTagsByName('deprecated')) {

@@ -12,6 +12,16 @@ use PHPUnit\Framework\TestCase;
 
 class PhpDocOperationExtractorTest extends TestCase
 {
+    /**
+     * @var PhpDocOperationExtractor
+     */
+    private $phpDocOperationExtractor;
+
+    public function setUp()
+    {
+        $this->phpDocOperationExtractor = new PhpDocOperationExtractor();
+    }
+
     public function provideTestCanExtract()
     {
         $reflectionMethod = new \ReflectionMethod(__NAMESPACE__ . '\PhpDocOperationExtractorStubService', 'operation');
@@ -33,16 +43,14 @@ class PhpDocOperationExtractorTest extends TestCase
      */
     public function testCanExtract($source, $type, $canBeExtract)
     {
-        $extractor = new PhpDocOperationExtractor();
-
         /** @var ExtractionContextInterface $context */
         $context = $this->getMockForAbstractClass(ExtractionContextInterface::class);
 
-        $this->assertSame($canBeExtract, $extractor->canExtract($source, $type, $context));
+        $this->assertSame($canBeExtract, $this->phpDocOperationExtractor->canExtract($source, $type, $context));
 
         if (!$canBeExtract) {
             try {
-                $extractor->extract($source, $type, $context);
+                $this->phpDocOperationExtractor->extract($source, $type, $context);
                 $this->fail('should throw a exception of type [Draw\Swagger\Extraction\ExtractionImpossibleException]');
             } catch (ExtractionImpossibleException $e) {
                 $this->assertTrue(true);
@@ -50,12 +58,50 @@ class PhpDocOperationExtractorTest extends TestCase
         }
     }
 
+
+
     public function testExtract()
     {
-        $extractor = new PhpDocOperationExtractor();
-        $extractor->registerExceptionResponseCodes('Draw\Swagger\Extraction\ExtractionImpossibleException', 400);
-        $extractor->registerExceptionResponseCodes('LengthException', 408, 'Define message');
-        $reflectionMethod = new \ReflectionMethod(__NAMESPACE__ . '\PhpDocOperationExtractorStubService', 'operation');
+        $this->phpDocOperationExtractor->registerExceptionResponseCodes('Draw\Swagger\Extraction\ExtractionImpossibleException', 400);
+        $this->phpDocOperationExtractor->registerExceptionResponseCodes('LengthException', 408, 'Define message');
+
+        $context = $this->extractStubServiceMethod('operation');
+
+        $this->assertJsonStringEqualsJsonString(
+            file_get_contents(__DIR__ . '/fixture/phpDocOperationExtractorExtract.json'),
+            $context->getSwagger()->dump($context->getRootSchema(), false)
+        );
+    }
+
+    public function testExtract_void()
+    {
+        $context = $this->extractStubServiceMethod('void');
+
+        $this->assertJsonStringEqualsJsonString(
+            file_get_contents(__DIR__ . '/fixture/phpDocOperationExtractorExtract_testExtract_void.json'),
+            $context->getSwagger()->dump($context->getRootSchema(), false)
+        );
+    }
+
+    public function testExtract_defaultVoid()
+    {
+        $context = $this->extractStubServiceMethod('defaultVoid');
+
+        $this->assertJsonStringEqualsJsonString(
+            file_get_contents(__DIR__ . '/fixture/phpDocOperationExtractorExtract_testExtract_defaultVoid.json'),
+            $context->getSwagger()->dump($context->getRootSchema(), false)
+        );
+    }
+
+    /**
+     * @param $method
+     * @return ExtractionContext
+     * @throws ExtractionImpossibleException
+     * @throws \ReflectionException
+     */
+    private function extractStubServiceMethod($method)
+    {
+        $reflectionMethod = new \ReflectionMethod(__NAMESPACE__ . '\PhpDocOperationExtractorStubService', $method);
 
         $context = $this->getExtractionContext();
         $context->getSwagger()->registerExtractor(new TypeSchemaExtractor());
@@ -64,12 +110,9 @@ class PhpDocOperationExtractorTest extends TestCase
 
         $pathItem->get = $operation = new Operation();
 
-        $extractor->extract($reflectionMethod, $operation, $context);
+        $this->phpDocOperationExtractor->extract($reflectionMethod, $operation, $context);
 
-        $this->assertJsonStringEqualsJsonString(
-            file_get_contents(__DIR__ . '/fixture/phpDocOperationExtractorExtract.json'),
-            $context->getSwagger()->dump($context->getRootSchema(), false)
-        );
+        return $context;
     }
 
     public function getExtractionContext()
@@ -97,5 +140,21 @@ class PhpDocOperationExtractorStubService
     public function operation(PhpDocOperationExtractorStubService $service, $string, array $array)
     {
         return $service;
+    }
+
+    /**
+     * @return void Does not return value
+     */
+    public function void()
+    {
+
+    }
+
+    /**
+     *
+     */
+    public function defaultVoid()
+    {
+
     }
 }
