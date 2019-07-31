@@ -9,6 +9,8 @@ use JMS\Serializer\Annotation as JMS;
  * @see https://github.com/swagger-api/swagger-spec/blob/master/versions/2.0.md#headerObject
  *
  * @author Martin Poirier Theoret <mpoiriert@gmail.com>
+ *
+ * @Annotation
  */
 class Header 
 {

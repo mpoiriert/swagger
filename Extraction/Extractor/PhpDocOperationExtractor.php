@@ -104,6 +104,7 @@ class PhpDocOperationExtractor implements ExtractorInterface
                     $response->schema = $responseSchema = new Schema();
                     $subContext = $extractionContext->createSubContext();
                     $subContext->setParameter('controller-reflection-method', $method);
+                    $subContext->setParameter('response', $response);
                     $extractionContext->getSwagger()->extract($type, $responseSchema, $subContext);
                     $statusCode = $subContext->getParameter('response-status-code', 200);
                 } else {
