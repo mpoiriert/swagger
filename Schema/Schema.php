@@ -175,12 +175,16 @@ class Schema implements GroupSequenceProviderInterface
     /**
      * @var Schema[]
      *
+     * @Assert\Valid()
+     *
      * @JMS\Type("array<string,Draw\Swagger\Schema\Schema>")
      */
     public $properties;
 
     /**
      * @var Schema
+     *
+     * @Assert\Valid()
      *
      * @JMS\Type("Draw\Swagger\Schema\Schema")
      * @JMS\SerializedName("additionalProperties")
@@ -218,6 +222,8 @@ class Schema implements GroupSequenceProviderInterface
      *
      * @var Xml
      *
+     * @Assert\Valid()
+     *
      * @JMS\Type("Draw\Swagger\Schema\Xml")
      */
     public $xml;
@@ -226,6 +232,8 @@ class Schema implements GroupSequenceProviderInterface
      * Additional external documentation.
      *
      * @var ExternalDocumentation
+     *
+     * @Assert\Valid()
      *
      * @JMS\Type("Draw\Swagger\Schema\ExternalDocumentation")
      * @JMS\SerializedName("externalDocs")
@@ -237,6 +245,9 @@ class Schema implements GroupSequenceProviderInterface
      * A free-form property to include a an example of an instance for this schema.
      *
      * @var Mixed
+     *
+     * @Assert\Valid()
+     *
      * @JMS\Type("Draw\Swagger\Schema\Mixed")
      */
     public $example;
