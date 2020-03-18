@@ -116,6 +116,14 @@ class JmsExtractor implements ExtractorInterface
 
         /** @var PropertyMetadata $item */
         foreach ($meta->propertyMetadata as $item) {
+            // This is to prevent property of discriminator field name to not being complete
+            if (isset($meta->discriminatorFieldName)
+                && $item->name == $meta->discriminatorFieldName
+                && !isset($item->type['name'])
+            ) {
+                $item->type = ['name' => 'string', 'params' => []];
+            }
+
             if ($this->shouldSkipProperty($exclusionStrategies, $item, $subContext)) {
                 continue;
             }
