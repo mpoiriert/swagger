@@ -1,12 +1,8 @@
 language: php
 php:
   - "7.2"
-
-env:
-  - JMS_SERIALIZER_VERSION="~1.0"
-  - JMS_SERIALIZER_VERSION="~2.0"
-  - JMS_SERIALIZER_VERSION="~3.0"
+  - "7.3"
+  - "7.4"
 
 before_script:
-  - composer require jms/serializer:${JMS_SERIALIZER_VERSION}
   - composer install --dev

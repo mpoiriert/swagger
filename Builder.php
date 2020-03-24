@@ -2,9 +2,7 @@
 
 use Doctrine\Common\Annotations\AnnotationReader;
 use Doctrine\Common\Annotations\Reader;
-use Doctrine\Common\Persistence\ManagerRegistry;
-use Doctrine\Common\Persistence\Mapping\ClassMetadataFactory;
-use Doctrine\ORM\EntityManager;
+use Doctrine\Persistence\ManagerRegistry;
 use Draw\Swagger\Extraction\Extractor\ConstraintExtractor;
 use Draw\Swagger\Extraction\Extractor\DoctrineInheritanceExtractor;
 use Draw\Swagger\Extraction\Extractor\JmsExtractor;
@@ -15,9 +13,11 @@ use Draw\Swagger\Extraction\Extractor\TypeSchemaExtractor;
 use JMS\Serializer\EventDispatcher\EventDispatcher;
 use JMS\Serializer\Naming\CamelCaseNamingStrategy;
 use JMS\Serializer\Naming\SerializedNameAnnotationStrategy;
+use JMS\Serializer\SerializationContext;
 use JMS\Serializer\Serializer;
 use JMS\Serializer\SerializerBuilder;
 use JMS\Serializer\SerializerInterface;
+use ReflectionClass;
 use Symfony\Component\Validator\Mapping\Factory\LazyLoadingMetadataFactory;
 use Symfony\Component\Validator\Mapping\Factory\MetadataFactoryInterface;
 use Symfony\Component\Validator\Mapping\Loader\AnnotationLoader;
@@ -202,7 +202,8 @@ class Builder
 
         if ($this->registerDefaultsExtractor) {
             if ($serializer instanceof Serializer) {
-                $metaDataFactory = $serializer->getMetadataFactory();
+                $serializer->serialize([], 'json', $context = new SerializationContext());
+                $metaDataFactory = $context->getMetadataFactory();
                 $swagger->registerExtractor(
                     new JmsExtractor(
                         $metaDataFactory,
@@ -215,7 +216,7 @@ class Builder
                 $extractName = pathinfo($file, PATHINFO_FILENAME);
                 $className = 'Draw\Swagger\Extraction\Extractor\Constraint\\' . $extractName;
 
-                $reflection = new \ReflectionClass($className);
+                $reflection = new ReflectionClass($className);
                 if (!$reflection->isInstantiable()) {
                     continue;
                 }

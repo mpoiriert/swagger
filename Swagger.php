@@ -7,12 +7,14 @@ use Draw\Swagger\Extraction\ExtractionContext;
 use Draw\Swagger\Extraction\ExtractionContextInterface;
 use Draw\Swagger\Extraction\ExtractorInterface;
 use Draw\Swagger\Extraction\Extractor\SwaggerSchemaExtractor;
+use InvalidArgumentException;
 use JMS\Serializer\EventDispatcher\EventDispatcher;
 use JMS\Serializer\Handler\HandlerRegistry;
 use JMS\Serializer\SerializerBuilder;
 use JMS\Serializer\SerializerInterface;
 use Draw\Swagger\Schema\Swagger as Schema;
 use Symfony\Component\Validator\Constraint;
+use Symfony\Component\Validator\ConstraintViolationList;
 use Symfony\Component\Validator\Validation;
 
 /**
@@ -119,27 +121,22 @@ class Swagger
      */
     public function validate(Schema $schema)
     {
-        $validator = Validation::createValidatorBuilder()
+        /** @var ConstraintViolationList $result */
+        $result = Validation::createValidatorBuilder()
             ->enableAnnotationMapping(new AnnotationReader())
-            ->getValidator();
-
-        //This is to support legacy system, that way we don't we are less strict for dependencies
-        if ($validator instanceof \Symfony\Component\Validator\ValidatorInterface) {
-            $result = $validator->validate($schema, array(Constraint::DEFAULT_GROUP), true, true);
-        } else {
-            $result = $validator->validate($schema, null, array(Constraint::DEFAULT_GROUP));
-        }
+            ->getValidator()
+            ->validate($schema, null, array(Constraint::DEFAULT_GROUP));
 
         if (count($result)) {
-            throw new \InvalidArgumentException("" . $result);
+            throw new InvalidArgumentException("" . $result);
         }
     }
 
     /**
-     * @param mixed $source
-     * @param mixed $type
-     * @return mixed
-     * @api
+     * @param $source
+     * @param null $type
+     * @param ExtractionContextInterface|null $extractionContext
+     * @return Schema
      */
     public function extract($source, $type = null, ExtractionContextInterface $extractionContext = null)
     {

@@ -8,6 +8,7 @@ use Draw\Swagger\Extraction\ExtractionImpossibleException;
 use Draw\Swagger\Extraction\ExtractorInterface;
 use Draw\Swagger\Schema\BaseParameter;
 use Draw\Swagger\Schema\Operation;
+use ReflectionMethod;
 
 class SwaggerParameterExtractor implements ExtractorInterface
 {
@@ -23,7 +24,7 @@ class SwaggerParameterExtractor implements ExtractorInterface
 
     public function canExtract($source, $target, ExtractionContextInterface $extractionContext)
     {
-        if(!$source instanceof \ReflectionMethod) {
+        if(!$source instanceof ReflectionMethod) {
             return false;
         }
 
@@ -35,7 +36,7 @@ class SwaggerParameterExtractor implements ExtractorInterface
     }
 
     /**
-     * @param \ReflectionMethod $source
+     * @param ReflectionMethod $source
      * @param Operation $target
      * @param ExtractionContextInterface $extractionContext
      * @throws ExtractionImpossibleException

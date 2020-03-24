@@ -10,6 +10,7 @@ use Draw\Swagger\Swagger;
 use JMS\Serializer\Annotation as JMS;
 use JMS\Serializer\Naming\CamelCaseNamingStrategy;
 use JMS\Serializer\Naming\SerializedNameAnnotationStrategy;
+use JMS\Serializer\SerializationContext;
 use JMS\Serializer\SerializerBuilder;
 use PHPUnit\Framework\TestCase;
 use ReflectionClass;
@@ -35,14 +36,10 @@ class JmsExtractorTest extends TestCase
     {
         $serializer = SerializerBuilder::create()->build();
 
-        //This is to be compatible for version 1,2,3 of jms since the method getMetadataFactory doesn't exists anymore
-        //When using the library you should inject the factory on your initializing flow
-        $property = new \ReflectionProperty(get_class($serializer), 'factory');
-        $property->setAccessible(true);
-        $metadataFactory = $property->getValue($serializer);
+        $serializer->serialize([], 'json', $context = new SerializationContext());
 
         $this->jmsExtractor = new JmsExtractor(
-            $metadataFactory,
+            $context->getMetadataFactory(),
             new SerializedNameAnnotationStrategy(new CamelCaseNamingStrategy())
         );
     }
@@ -57,7 +54,7 @@ class JmsExtractorTest extends TestCase
     public function testCanExtract($source, $type, $canBeExtract)
     {
         if (!is_null($source)) {
-            $source = new \ReflectionClass($source);
+            $source = new ReflectionClass($source);
         }
 
         /** @var ExtractionContextInterface $context */

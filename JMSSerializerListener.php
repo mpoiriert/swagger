@@ -10,6 +10,7 @@ use JMS\Serializer\EventDispatcher\PreDeserializeEvent;
 use JMS\Serializer\EventDispatcher\PreSerializeEvent;
 use JMS\Serializer\JsonSerializationVisitor;
 use JMS\Serializer\Metadata\StaticPropertyMetadata;
+use ReflectionClass;
 
 class JMSSerializerListener implements EventSubscriberInterface
 {
@@ -69,8 +70,8 @@ class JMSSerializerListener implements EventSubscriberInterface
             return;
         }
 
-        $reflectionClass = new \ReflectionClass($type['name']);
-        if(!$reflectionClass->implementsInterface('Draw\Swagger\Schema\VendorExtensionSupportInterface')) {
+        $reflectionClass = new ReflectionClass($type['name']);
+        if(!$reflectionClass->implementsInterface(VendorExtensionSupportInterface::class)) {
             return;
         }
 
@@ -88,7 +89,7 @@ class JMSSerializerListener implements EventSubscriberInterface
         if($object instanceof VendorExtensionSupportInterface) {
             foreach($object->getVendorData() as $key => $value) {
                 //The context argument is there for older version of JMS, new version don't have a third argument
-                $visitor->visitProperty(new StaticPropertyMetadata("", $key, $value), $value, $event->getContext());
+                $visitor->visitProperty(new StaticPropertyMetadata("", $key, $value), $value);
             }
         }
     }

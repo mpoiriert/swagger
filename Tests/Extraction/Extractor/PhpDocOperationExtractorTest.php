@@ -8,7 +8,10 @@ use Draw\Swagger\Extraction\Extractor\TypeSchemaExtractor;
 use Draw\Swagger\Schema\Operation;
 use Draw\Swagger\Schema\PathItem;
 use Draw\Swagger\Swagger;
+use Exception;
+use LengthException;
 use PHPUnit\Framework\TestCase;
+use ReflectionMethod;
 
 class PhpDocOperationExtractorTest extends TestCase
 {
@@ -24,7 +27,7 @@ class PhpDocOperationExtractorTest extends TestCase
 
     public function provideTestCanExtract()
     {
-        $reflectionMethod = new \ReflectionMethod(__NAMESPACE__ . '\PhpDocOperationExtractorStubService', 'operation');
+        $reflectionMethod = new ReflectionMethod(__NAMESPACE__ . '\PhpDocOperationExtractorStubService', 'operation');
 
         return array(
             array(null, null, false),
@@ -114,12 +117,10 @@ class PhpDocOperationExtractorTest extends TestCase
     /**
      * @param $method
      * @return ExtractionContext
-     * @throws ExtractionImpossibleException
-     * @throws \ReflectionException
      */
     private function extractStubServiceMethod($method)
     {
-        $reflectionMethod = new \ReflectionMethod(__NAMESPACE__ . '\PhpDocOperationExtractorStubService', $method);
+        $reflectionMethod = new ReflectionMethod(__NAMESPACE__ . '\PhpDocOperationExtractorStubService', $method);
 
         $context = $this->getExtractionContext();
         $context->getSwagger()->registerExtractor(new TypeSchemaExtractor());
@@ -147,6 +148,9 @@ class PhpDocOperationExtractorStubClass
 
 }
 
+/**
+ * This class is a stub and the code implementation make no sens, just the doc is usefull
+ */
 class PhpDocOperationExtractorStubService
 {
     /**
@@ -156,12 +160,15 @@ class PhpDocOperationExtractorStubService
      *
      * @return PhpDocOperationExtractorStubService
      *
-     * @throws \Exception When problem occur
-     * @throws \LengthException
-     * @throws \Draw\Swagger\Extraction\ExtractionImpossibleException
+     * @throws Exception When problem occur
+     * @throws LengthException
+     * @throws ExtractionImpossibleException
      */
     public function operation(PhpDocOperationExtractorStubService $service, $string, array $array)
     {
+        if($string) {
+            throw new ExtractionImpossibleException();
+        }
         return $service;
     }
 
@@ -186,7 +193,7 @@ class PhpDocOperationExtractorStubService
      */
     public function arrayOfPrimitive()
     {
-
+        return [];
     }
 
     /**
@@ -194,6 +201,6 @@ class PhpDocOperationExtractorStubService
      */
     public function genericCollection()
     {
-
+        return new PhpDocOperationExtractorStubClass();
     }
 }

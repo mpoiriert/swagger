@@ -2,53 +2,25 @@
 
 namespace Draw\Swagger\Extraction;
 
+use Draw\Swagger\Swagger;
+
 interface ExtractionContextInterface
 {
-    /**
-     * @return \Draw\Swagger\Swagger
-     */
-    public function getSwagger();
+    public function getSwagger(): Swagger;
 
-    /**
-     * @return \Draw\Swagger\Schema\Swagger
-     */
-    public function getRootSchema();
+    public function getRootSchema(): \Draw\Swagger\Schema\Swagger;
 
-    /**
-     * @return boolean
-     */
-    public function hasParameter($name);
+    public function hasParameter($name): bool;
 
-    /**
-     * @param $name
-     * @param null $default
-     * @return mixed
-     */
     public function getParameter($name, $default = null);
 
-    /**
-     * @return array
-     */
-    public function getParameters();
+    public function getParameters(): array;
 
-    /**
-     * @param $name
-     * @param $value
-     */
-    public function setParameter($name, $value);
+    public function setParameter($name, $value): void;
 
-    /**
-     * @param $name
-     */
-    public function removeParameter($name);
+    public function removeParameter($name): void;
 
-    /**
-     * @param array $parameters
-     */
-    public function setParameters(array $parameters);
-
-    /**
-     * @return ExtractionContextInterface
-     */
-    public function createSubContext();
+    public function setParameters(array $parameters): void;
+    
+    public function createSubContext(): ExtractionContextInterface;
 }

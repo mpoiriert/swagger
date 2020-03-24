@@ -1,11 +1,12 @@
 <?php namespace Draw\Swagger\Extraction\Extractor;
 
-use Doctrine\Common\Persistence\ManagerRegistry;
-use Doctrine\ORM\Mapping\ClassMetadata;
+use Doctrine\ORM\Mapping\ClassMetadataInfo;
+use Doctrine\Persistence\ManagerRegistry;
 use Draw\Swagger\Extraction\ExtractionContextInterface;
 use Draw\Swagger\Extraction\ExtractionImpossibleException;
 use Draw\Swagger\Extraction\ExtractorInterface;
 use Draw\Swagger\Schema\Schema;
+use ReflectionClass;
 
 class DoctrineInheritanceExtractor implements ExtractorInterface
 {
@@ -21,7 +22,7 @@ class DoctrineInheritanceExtractor implements ExtractorInterface
 
     public function canExtract($source, $target, ExtractionContextInterface $extractionContext)
     {
-        if (!$source instanceof \ReflectionClass) {
+        if (!$source instanceof ReflectionClass) {
             return false;
         }
 
@@ -37,7 +38,7 @@ class DoctrineInheritanceExtractor implements ExtractorInterface
     }
 
     /**
-     * @param \ReflectionClass $source
+     * @param ReflectionClass $source
      * @param Schema $target
      * @param ExtractionContextInterface $extractionContext
      *
@@ -49,9 +50,8 @@ class DoctrineInheritanceExtractor implements ExtractorInterface
             throw new ExtractionImpossibleException();
         }
 
-
         $metaData = $this->managerRegistry->getManagerForClass($source->name)->getClassMetadata($source->name);
-        if (!$metaData instanceof ClassMetadata) {
+        if (!$metaData instanceof ClassMetadataInfo) {
             return;
         }
 

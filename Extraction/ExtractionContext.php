@@ -25,20 +25,17 @@ class ExtractionContext implements ExtractionContextInterface
         $this->swagger = $swagger;
     }
 
-    public function getRootSchema()
+    public function getRootSchema(): Schema
     {
         return $this->rootSchema;
     }
 
-    public function getSwagger()
+    public function getSwagger(): Swagger
     {
         return $this->swagger;
     }
 
-    /**
-     * @return mixed
-     */
-    public function hasParameter($name)
+    public function hasParameter($name): bool
     {
         return array_key_exists($name, $this->parameters);
     }
@@ -48,27 +45,27 @@ class ExtractionContext implements ExtractionContextInterface
         return $this->hasParameter($name) ? $this->parameters[$name] : $default;
     }
 
-    public function getParameters()
+    public function getParameters(): array
     {
         return $this->parameters;
     }
 
-    public function setParameter($name, $value)
+    public function setParameter($name, $value): void
     {
         $this->parameters[$name] = $value;
     }
 
-    public function removeParameter($name)
+    public function removeParameter($name): void
     {
         unset($this->parameters[$name]);
     }
 
-    public function setParameters(array $parameters)
+    public function setParameters(array $parameters): void
     {
         $this->parameters = $parameters;
     }
 
-    public function createSubContext()
+    public function createSubContext(): ExtractionContextInterface
     {
         return clone $this;
     }

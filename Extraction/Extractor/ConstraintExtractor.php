@@ -7,8 +7,10 @@ use Draw\Swagger\Extraction\ExtractionImpossibleException;
 use Draw\Swagger\Extraction\Extractor\Constraint\ConstraintExtractionContext;
 use Draw\Swagger\Extraction\Extractor\Constraint\ConstraintExtractorInterface;
 use Draw\Swagger\Schema\Schema;
+use InvalidArgumentException;
 use Symfony\Component\Validator\Constraint;
 use ReflectionClass;
+use Symfony\Component\Validator\Mapping\ClassMetadataInterface;
 use Symfony\Component\Validator\Mapping\Factory\MetadataFactoryInterface;
 
 abstract class ConstraintExtractor implements ConstraintExtractorInterface
@@ -30,7 +32,7 @@ abstract class ConstraintExtractor implements ConstraintExtractorInterface
     protected function assertSupportConstraint(Constraint $constraint)
     {
         if (!$this->supportConstraint($constraint)) {
-            throw new \InvalidArgumentException(
+            throw new InvalidArgumentException(
                 sprintf(
                     'The constraint of type [%s] is not supported by [%s]',
                     get_class($constraint),
@@ -87,9 +89,9 @@ abstract class ConstraintExtractor implements ConstraintExtractorInterface
         }
 
         $constraints = array();
-        $classMetadata = $this->metadataFactory->getMetadataFor($class);
-        /* @var \Symfony\Component\Validator\Mapping\ClassMetadataInterface $classMetadata */
 
+        /* @var ClassMetadataInterface $classMetadata */
+        $classMetadata = $this->metadataFactory->getMetadataFor($class);
         foreach ($classMetadata->getConstrainedProperties() as $propertyName) {
 
             //This is to prevent hading properties just because they have validation

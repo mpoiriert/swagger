@@ -18,7 +18,7 @@ class NotBlankConstraintExtractor extends ConstraintExtractor
     }
 
     /**
-     * @param SupportedConstraint $constraint
+     * @param SupportedConstraint|Constraint $constraint
      * @param ConstraintExtractionContext $context
      */
     public function extractConstraint(Constraint $constraint, ConstraintExtractionContext $context)

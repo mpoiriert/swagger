@@ -9,6 +9,7 @@ use Draw\Swagger\Schema\BodyParameter;
 use Draw\Swagger\Schema\Operation;
 use Draw\Swagger\Schema\Response;
 use Draw\Swagger\Schema\Schema;
+use Exception;
 use phpDocumentor\Reflection\DocBlock;
 use phpDocumentor\Reflection\DocBlockFactory;
 use phpDocumentor\Reflection\DocBlockFactoryInterface;
@@ -16,14 +17,16 @@ use phpDocumentor\Reflection\Type;
 use phpDocumentor\Reflection\Types\Compound;
 use phpDocumentor\Reflection\Types\ContextFactory;
 use phpDocumentor\Reflection\Types\Void_;
+use ReflectionClass;
 use ReflectionMethod;
+use Reflector;
+use RuntimeException;
 
 class PhpDocOperationExtractor implements ExtractorInterface
 {
     private $contextFactory;
     private $docBlockFactory;
     private $exceptionResponseCodes = array();
-    private $phpDocTypeHelper;
 
     public function __construct(
         DocBlockFactoryInterface $docBlockFactory = null
@@ -55,10 +58,10 @@ class PhpDocOperationExtractor implements ExtractorInterface
     }
 
     /**
-     * @param \Reflector $reflector
+     * @param Reflector $reflector
      * @return DocBlock
      */
-    private function createDocBlock(\Reflector $reflector)
+    private function createDocBlock(Reflector $reflector)
     {
         return $this->docBlockFactory
             ->create(
@@ -96,6 +99,7 @@ class PhpDocOperationExtractor implements ExtractorInterface
         /** @var Type[] $types */
         $types = [];
         $hasVoid = false;
+        $returnTag = null;
         foreach ($docBlock->getTagsByName('return') as $returnTag) {
             /* @var $returnTag DocBlock\Tags\Return_ */
             $type = $returnTag->getType();
@@ -108,26 +112,27 @@ class PhpDocOperationExtractor implements ExtractorInterface
         }
 
         if($hasVoid && count($types) > 1) {
-            throw new \RuntimeException('Operation returning [void] cannot return anything else.');
+            throw new RuntimeException('Operation returning [void] cannot return anything else.');
         }
 
-        foreach ($types as $type) {
-            $response = new Response();
-            $response->description = (string)$returnTag->getDescription() ?: null;
-            if($type != 'void' && $type != 'null') {
-                $response->schema = $responseSchema = new Schema();
-                $subContext = $extractionContext->createSubContext();
-                $subContext->setParameter('controller-reflection-method', $method);
-                $subContext->setParameter('response', $response);
-                $extractionContext->getSwagger()->extract((string)$type, $responseSchema, $subContext);
-                $statusCode = $subContext->getParameter('response-status-code', 200);
-            } else {
-                $statusCode = 204;
+        if($returnTag) {
+            foreach ($types as $type) {
+                $response = new Response();
+                $response->description = (string)$returnTag->getDescription() ?: null;
+                if($type != 'void' && $type != 'null') {
+                    $response->schema = $responseSchema = new Schema();
+                    $subContext = $extractionContext->createSubContext();
+                    $subContext->setParameter('controller-reflection-method', $method);
+                    $subContext->setParameter('response', $response);
+                    $extractionContext->getSwagger()->extract((string)$type, $responseSchema, $subContext);
+                    $statusCode = $subContext->getParameter('response-status-code', 200);
+                } else {
+                    $statusCode = 204;
+                }
+
+                $operation->responses[$statusCode] = $response;
             }
-
-            $operation->responses[$statusCode] = $response;
         }
-
 
         if(!$operation->responses) {
             $operation->responses[204] = $response = new Response();
@@ -142,7 +147,8 @@ class PhpDocOperationExtractor implements ExtractorInterface
             /* @var $throwTag DocBlock\Tags\Throws */
 
             $type = (string)$throwTag->getType();
-            $exceptionClass = new \ReflectionClass((string)$type);
+            $exceptionClass = new ReflectionClass((string)$type);
+            /** @var Exception $exception */
             $exception = $exceptionClass->newInstanceWithoutConstructor();
             list($code, $message) = $this->getExceptionInformation($exception);
             $operation->responses[$code] = $exceptionResponse = new Response();
@@ -223,7 +229,7 @@ class PhpDocOperationExtractor implements ExtractorInterface
         }
     }
 
-    private function getExceptionInformation(\Exception $exception)
+    private function getExceptionInformation(Exception $exception)
     {
         foreach ($this->exceptionResponseCodes as $class => $information) {
             if ($exception instanceof $class) {

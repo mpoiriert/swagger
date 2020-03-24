@@ -5,6 +5,7 @@ namespace Draw\Swagger\Extraction\Extractor\Constraint;
 use Draw\Swagger\Extraction\Extractor\ConstraintExtractor;
 use Symfony\Component\Validator\Constraint;
 use Symfony\Component\Validator\Constraints\Choice as SupportedConstraint;
+use Symfony\Component\Validator\Exception\ConstraintDefinitionException;
 
 class ChoiceConstraintExtractor extends ConstraintExtractor
 {
@@ -18,27 +19,23 @@ class ChoiceConstraintExtractor extends ConstraintExtractor
     }
 
     /**
-     * @param SupportedConstraint $constraint
+     * @param SupportedConstraint|Constraint $constraint
      * @param ConstraintExtractionContext $context
      */
     public function extractConstraint(Constraint $constraint, ConstraintExtractionContext $context)
     {
         $this->assertSupportConstraint($constraint);
 
-
         if ($constraint->callback) {
-            if (is_callable(array($className, $constraint->callback))) {
-                $choices = call_user_func(array($className, $constraint->callback));
-            } elseif (is_callable($constraint->callback)) {
-                $choices = call_user_func($constraint->callback);
-            } else {
+            if (!is_callable($constraint->callback)) {
                 throw new ConstraintDefinitionException('The Choice constraint expects a valid callback');
             }
+            $choices = call_user_func($constraint->callback);
         } else {
             $choices = $constraint->choices;
         }
 
-        foreach($choices as $choice) {
+        foreach ($choices as $choice) {
             $context->propertySchema->enum[] = $choice;
         }
     }

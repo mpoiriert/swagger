@@ -1,7 +1,6 @@
 <?php namespace Draw\Swagger\Extraction\Extractor\JmsSerializer;
 
 use Draw\Swagger\Extraction\ExtractionContextInterface;
-use Draw\Swagger\Extraction\Extractor\JmsExtractor;
 use Draw\Swagger\Schema\Schema;
 use JMS\Serializer\Metadata\PropertyMetadata;
 

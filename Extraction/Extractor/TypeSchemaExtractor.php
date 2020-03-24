@@ -9,6 +9,7 @@ use Draw\Swagger\Extraction\ExtractorInterface;
 use Draw\Swagger\Schema\Schema;
 use phpDocumentor\Reflection\TypeResolver;
 use phpDocumentor\Reflection\Types\Collection;
+use ReflectionClass;
 
 class TypeSchemaExtractor implements ExtractorInterface
 {
@@ -84,7 +85,7 @@ class TypeSchemaExtractor implements ExtractorInterface
 
         if($target->type == 'generic') {
             $target->type = 'object';
-            $reflectionClass = new \ReflectionClass($primitiveType['class']);
+            $reflectionClass = new ReflectionClass($primitiveType['class']);
             $subContext = $extractionContext->createSubContext();
             $subContext->setParameter('generic-template', $primitiveType['template']);
             $extractionContext->getSwagger()->extract(
@@ -98,7 +99,7 @@ class TypeSchemaExtractor implements ExtractorInterface
 
         if ($target->type == "object") {
             $target->type = null;
-            $reflectionClass = new \ReflectionClass($primitiveType['class']);
+            $reflectionClass = new ReflectionClass($primitiveType['class']);
             $rootSchema = $extractionContext->getRootSchema();
             $context = $extractionContext->getParameter('model-context', []);
 
