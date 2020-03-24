@@ -7,6 +7,8 @@ use Draw\Swagger\Schema\Schema as SupportedTarget;
 use Draw\Swagger\Extraction\ExtractionContextInterface;
 use Draw\Swagger\Extraction\ExtractorInterface;
 use Draw\Swagger\Schema\Schema;
+use phpDocumentor\Reflection\TypeResolver;
+use phpDocumentor\Reflection\Types\Collection;
 
 class TypeSchemaExtractor implements ExtractorInterface
 {
@@ -16,6 +18,8 @@ class TypeSchemaExtractor implements ExtractorInterface
     private $definitionAliases = array();
 
     private $definitionHashes = array();
+
+    private static $typeResolver;
 
     public function registerDefinitionAlias($definition, $alias)
     {
@@ -74,6 +78,20 @@ class TypeSchemaExtractor implements ExtractorInterface
                     $extractionContext
                 );
             }
+
+            return;
+        }
+
+        if($target->type == 'generic') {
+            $target->type = 'object';
+            $reflectionClass = new \ReflectionClass($primitiveType['class']);
+            $subContext = $extractionContext->createSubContext();
+            $subContext->setParameter('generic-template', $primitiveType['template']);
+            $extractionContext->getSwagger()->extract(
+                $reflectionClass,
+                $target,
+                $subContext
+            );
 
             return;
         }
@@ -151,6 +169,20 @@ class TypeSchemaExtractor implements ExtractorInterface
         if (!is_string($type)) {
             return null;
         }
+
+        if(is_null(self::$typeResolver)) {
+            self::$typeResolver = new TypeResolver();
+        }
+
+        $result = self::$typeResolver->resolve($type);
+
+        if($result instanceof Collection) {
+            return [
+                'type' => 'generic',
+                'class' => (string)$result->getFqsen(),
+                'template' => (string)$result->getValueType()
+            ];
+        };
 
         $primitiveType = array();
 

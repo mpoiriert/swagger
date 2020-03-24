@@ -58,8 +58,6 @@ class PhpDocOperationExtractorTest extends TestCase
         }
     }
 
-
-
     public function testExtract()
     {
         $this->phpDocOperationExtractor->registerExceptionResponseCodes('Draw\Swagger\Extraction\ExtractionImpossibleException', 400);
@@ -89,6 +87,26 @@ class PhpDocOperationExtractorTest extends TestCase
 
         $this->assertJsonStringEqualsJsonString(
             file_get_contents(__DIR__ . '/fixture/phpDocOperationExtractorExtract_testExtract_defaultVoid.json'),
+            $context->getSwagger()->dump($context->getRootSchema(), false)
+        );
+    }
+
+    public function testExtract_arrayOfPrimitive()
+    {
+        $context = $this->extractStubServiceMethod('arrayOfPrimitive');
+
+        $this->assertJsonStringEqualsJsonString(
+            file_get_contents(__DIR__ . '/fixture/phpDocOperationExtractorExtract_testExtract_arrayOfPrimitive.json'),
+            $context->getSwagger()->dump($context->getRootSchema(), false)
+        );
+    }
+
+    public function testExtract_genericCollection()
+    {
+        $context = $this->extractStubServiceMethod('genericCollection');
+
+        $this->assertJsonStringEqualsJsonString(
+            file_get_contents(__DIR__ . '/fixture/phpDocOperationExtractorExtract_testExtract_genericCollection.json'),
             $context->getSwagger()->dump($context->getRootSchema(), false)
         );
     }
@@ -124,6 +142,11 @@ class PhpDocOperationExtractorTest extends TestCase
     }
 }
 
+class PhpDocOperationExtractorStubClass
+{
+
+}
+
 class PhpDocOperationExtractorStubService
 {
     /**
@@ -154,6 +177,22 @@ class PhpDocOperationExtractorStubService
      *
      */
     public function defaultVoid()
+    {
+
+    }
+
+    /**
+     * @return int[]
+     */
+    public function arrayOfPrimitive()
+    {
+
+    }
+
+    /**
+     * @return PhpDocOperationExtractorStubClass<int>
+     */
+    public function genericCollection()
     {
 
     }

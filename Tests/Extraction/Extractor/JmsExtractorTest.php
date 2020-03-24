@@ -82,7 +82,10 @@ class JmsExtractorTest extends TestCase
         $context = $this->getExtractionContext();
 
         //Need to be there to validate that JMS extract it's type properly
-        $context->getSwagger()->registerExtractor(new TypeSchemaExtractor());
+        $swagger = $context->getSwagger();
+        $swagger->registerExtractor(new TypeSchemaExtractor());
+        $swagger->registerExtractor($this->jmsExtractor);
+
         $context->setParameter('model-context', ['serializer-groups' => ['test']]);
         $schema = $context->getRootSchema();
 
@@ -118,6 +121,15 @@ class JmsExtractorStubModel
      * @JMS\ReadOnly()
      */
     public $name;
+
+    /**
+     * @var
+     *
+     * @JMS\Type("Draw\Swagger\Tests\Extraction\Extractor\JmsExtractorStubGeneric<string>")
+     * @JMS\Groups("test")
+     * @JMS\ReadOnly()
+     */
+    public $generic;
 
     /**
      * Serialized property
@@ -163,4 +175,17 @@ class JmsExtractorStubModel
     public function getVirtual()
     {
     }
+}
+
+class JmsExtractorStubGeneric
+{
+    /**
+     * The generic property.
+     *
+     * @var string
+     * @JMS\Type("generic")
+     * @JMS\Groups("test")
+     * @JMS\ReadOnly()
+     */
+    public $name;
 }

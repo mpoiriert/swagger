@@ -4,6 +4,7 @@ use Draw\Swagger\Extraction\ExtractionContextInterface;
 use Draw\Swagger\Extraction\ExtractionImpossibleException;
 use Draw\Swagger\Extraction\Extractor\JmsSerializer\ArrayTypeToSchemaHandler;
 use Draw\Swagger\Extraction\Extractor\JmsSerializer\DynamicObjectTypeToSchemaHandler;
+use Draw\Swagger\Extraction\Extractor\JmsSerializer\GenericTypeToSchemaHandler;
 use Draw\Swagger\Extraction\Extractor\JmsSerializer\TypeToSchemaHandlerInterface;
 use Draw\Swagger\Extraction\ExtractorInterface;
 use Draw\Swagger\Schema\Schema;
@@ -48,6 +49,7 @@ class JmsExtractor implements ExtractorInterface
 
         $this->registerTypeToSchemaHandler(new DynamicObjectTypeToSchemaHandler());
         $this->registerTypeToSchemaHandler(new ArrayTypeToSchemaHandler());
+        $this->registerTypeToSchemaHandler(new GenericTypeToSchemaHandler());
     }
 
     public function registerTypeToSchemaHandler(TypeToSchemaHandlerInterface $typeToSchemaHandler)

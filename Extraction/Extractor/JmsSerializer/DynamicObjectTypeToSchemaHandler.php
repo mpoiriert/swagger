@@ -32,7 +32,6 @@ class DynamicObjectTypeToSchemaHandler implements TypeToSchemaHandlerInterface
             case isset($item->type['params'][0]['name']) != 'string':
             case !isset($item->type['params'][1]['name']):
                 return null;
-
         }
 
         return $item->type['params'][1]['name'];

@@ -11,13 +11,27 @@ use Draw\Swagger\Schema\Response;
 use Draw\Swagger\Schema\Schema;
 use phpDocumentor\Reflection\DocBlock;
 use phpDocumentor\Reflection\DocBlockFactory;
+use phpDocumentor\Reflection\DocBlockFactoryInterface;
+use phpDocumentor\Reflection\Type;
 use phpDocumentor\Reflection\Types\Compound;
 use phpDocumentor\Reflection\Types\ContextFactory;
+use phpDocumentor\Reflection\Types\Void_;
 use ReflectionMethod;
 
 class PhpDocOperationExtractor implements ExtractorInterface
 {
+    private $contextFactory;
+    private $docBlockFactory;
     private $exceptionResponseCodes = array();
+    private $phpDocTypeHelper;
+
+    public function __construct(
+        DocBlockFactoryInterface $docBlockFactory = null
+    )
+    {
+        $this->contextFactory = new ContextFactory();
+        $this->docBlockFactory =  $docBlockFactory ?: DocBlockFactory::createInstance();
+    }
 
     /**
      * Return if the extractor can extract the requested data or not.
@@ -46,14 +60,11 @@ class PhpDocOperationExtractor implements ExtractorInterface
      */
     private function createDocBlock(\Reflector $reflector)
     {
-        if(!method_exists($reflector, 'getDocComment')) {
-            throw new \InvalidArgumentException('$reflector parameter must have a [getDocComment] method.');
-        }
-
-        $contextFactory = new ContextFactory();
-        $context = $contextFactory->createFromReflector($reflector);
-
-        return DocBlockFactory::createInstance()->create($reflector->getDocComment(), $context);
+        return $this->docBlockFactory
+            ->create(
+                $reflector,
+                $this->contextFactory->createFromReflector($reflector)
+            );
     }
 
     /**
@@ -82,38 +93,41 @@ class PhpDocOperationExtractor implements ExtractorInterface
             $operation->description = (string)$docBlock->getDescription() ?: null;
         }
 
+        /** @var Type[] $types */
+        $types = [];
+        $hasVoid = false;
         foreach ($docBlock->getTagsByName('return') as $returnTag) {
             /* @var $returnTag DocBlock\Tags\Return_ */
-
             $type = $returnTag->getType();
-            // If multiple return types are specified in return tag, separate them
-            if ($type instanceof Compound) {
-                $types = explode('|', (string)$type);
+            $hasVoid = $hasVoid || $type instanceof Void_;
+            if($type instanceof Compound) {
+                $types = array_merge($types, $type->getIterator()->getArrayCopy());
             } else {
-                $types = [(string)$type];
-            }
-
-            foreach ($types as $type) {
-                if($type == 'void' && count($types) > 1) {
-                    throw new \RuntimeException('Operation returning [void] cannot return anything else.');
-                }
-
-                $response = new Response();
-                $response->description = (string)$returnTag->getDescription() ?: null;
-                if($type != 'void') {
-                    $response->schema = $responseSchema = new Schema();
-                    $subContext = $extractionContext->createSubContext();
-                    $subContext->setParameter('controller-reflection-method', $method);
-                    $subContext->setParameter('response', $response);
-                    $extractionContext->getSwagger()->extract($type, $responseSchema, $subContext);
-                    $statusCode = $subContext->getParameter('response-status-code', 200);
-                } else {
-                    $statusCode = 204;
-                }
-
-                $operation->responses[$statusCode] = $response;
+                $types[] = $type;
             }
         }
+
+        if($hasVoid && count($types) > 1) {
+            throw new \RuntimeException('Operation returning [void] cannot return anything else.');
+        }
+
+        foreach ($types as $type) {
+            $response = new Response();
+            $response->description = (string)$returnTag->getDescription() ?: null;
+            if($type != 'void' && $type != 'null') {
+                $response->schema = $responseSchema = new Schema();
+                $subContext = $extractionContext->createSubContext();
+                $subContext->setParameter('controller-reflection-method', $method);
+                $subContext->setParameter('response', $response);
+                $extractionContext->getSwagger()->extract((string)$type, $responseSchema, $subContext);
+                $statusCode = $subContext->getParameter('response-status-code', 200);
+            } else {
+                $statusCode = 204;
+            }
+
+            $operation->responses[$statusCode] = $response;
+        }
+
 
         if(!$operation->responses) {
             $operation->responses[204] = $response = new Response();
